@@ -48,14 +48,14 @@ end
 },
 DisableCondition={
 ShowIf=function()
-return SpellActivationOverlayDB~=nil
+return ProcSpellOverlayDB~=nil
 end,
 Text=SAO:disableWhenInstalled("Spell".."ActivationOverlay"),
 OnValueChanged=function(self,checked)
-SpellActivationOverlayDB.disableIfSAO=checked
+ProcSpellOverlayDB.disableIfSAO=checked
 end,
 IsDisabled=function()
-return SpellActivationOverlayDB.disableIfSAO==true or SpellActivationOverlayDB.disableIfSAO==nil
+return ProcSpellOverlayDB.disableIfSAO==true or ProcSpellOverlayDB.disableIfSAO==nil
 end,
 }
 }
@@ -68,11 +68,11 @@ return {
 Reason=SAO:becauseOf("|CFFFF00FFNe|CFFFF50FFcr|CFFFF99FFos|CFFFFC4FFis|CFFFFFFFF"),-- "Necrosis",with colors
 Button={
 ShowIf=function()
-return NecrosisSpellActivationOverlayOptionsPanel~=nil
+return NecrosisProcSpellOverlayOptionsPanel~=nil
 end,
 Text=SAO:openIt("Necrosis Spell Activations"),
 OnClick=function()
-InterfaceOptionsFrame_OpenToCategory(NecrosisSpellActivationOverlayOptionsPanel)
+InterfaceOptionsFrame_OpenToCategory(NecrosisProcSpellOverlayOptionsPanel)
 end
 },
 DisableCondition={
@@ -81,10 +81,10 @@ return NecrosisConfig~=nil
 end,
 Text=SAO:disableWhenInstalled("Necrosis"),
 OnValueChanged=function(self,checked)
-SpellActivationOverlayDB.disableIfNecrosis=checked
+ProcSpellOverlayDB.disableIfNecrosis=checked
 end,
 IsDisabled=function()
-return SpellActivationOverlayDB.disableIfNecrosis==true
+return ProcSpellOverlayDB.disableIfNecrosis==true
 end,
 },
 }

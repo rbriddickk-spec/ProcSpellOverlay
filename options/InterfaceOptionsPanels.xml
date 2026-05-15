@@ -2,7 +2,7 @@
 ..\FrameXML\UI.xsd">
   <Script file="InterfaceOptionsPanels.lua"/>
 
-  <Frame name="SpellActivationOverlayOptionsPanel" hidden="true" parent="UIParent">
+  <Frame name="ProcSpellOverlayOptionsPanel" hidden="true" parent="UIParent">
     <Layers>
       <Layer level="ARTWORK">
         <FontString name="$parentBuildInfo" text="" inherits="GameFontNormal" justifyH="CENTER" justifyV="CENTER">
@@ -173,9 +173,9 @@
         <Scripts>
           <PostClick>
             if (self:GetChecked()) then
-              SpellActivationOverlayDB.debug = true;
+              ProcSpellOverlayDB.debug = true;
             else
-              SpellActivationOverlayDB.debug = nil;
+              ProcSpellOverlayDB.debug = nil;
             end
           </PostClick>
         </Scripts>
@@ -191,9 +191,9 @@
         <Scripts>
           <PostClick>
             if (self:GetChecked()) then
-              SpellActivationOverlayDB.report = nil;
+              ProcSpellOverlayDB.report = nil;
             else
-              SpellActivationOverlayDB.report = false;
+              ProcSpellOverlayDB.report = false;
             end
           </PostClick>
         </Scripts>
@@ -209,9 +209,9 @@
         <Scripts>
           <PostClick>
             if (self:GetChecked()) then
-              SpellActivationOverlayDB.responsiveMode = true;
+              ProcSpellOverlayDB.responsiveMode = true;
             else
-              SpellActivationOverlayDB.responsiveMode = nil;
+              ProcSpellOverlayDB.responsiveMode = nil;
             end
           </PostClick>
         </Scripts>
@@ -371,8 +371,8 @@
       </Layer>
     </Layers>
     <Scripts>
-      <OnShow function="SpellActivationOverlayOptionsPanel_OnShow"/>
-      <OnLoad function="SpellActivationOverlayOptionsPanel_OnLoad"/>
+      <OnShow function="ProcSpellOverlayOptionsPanel_OnShow"/>
+      <OnLoad function="ProcSpellOverlayOptionsPanel_OnLoad"/>
     </Scripts>
   </Frame>
 

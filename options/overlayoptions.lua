@@ -60,7 +60,7 @@ if (not bucket)then
 SAO:Debug("preview", "Trying to preview overlay with spell ID "..tostring(registeredSpellID).." but it is not registered, ".."or its registration failed")
 return
 end
-SpellActivationOverlayFrame_SetForceAlpha2(start)
+ProcSpellOverlayFrame_SetForceAlpha2(start)
 local fakeOffset=42000000
 local testHashCalculator=SAO.Hash:new()
 if type(testHash)=='string' then
@@ -94,7 +94,7 @@ end
 end
 end
 local optionIndex=hashCalculator:toOptionIndex()
-self:AddOption("alert",auraID,optionIndex,type(variants)=='table' and variants.values,applyTextFunc,testFunc,{frame=SpellActivationOverlayOptionsPanelSpellAlertLabel,xOffset=4,yOffset=-4})
+self:AddOption("alert",auraID,optionIndex,type(variants)=='table' and variants.values,applyTextFunc,testFunc,{frame=ProcSpellOverlayOptionsPanelSpellAlertLabel,xOffset=4,yOffset=-4})
 end
 function SAO.AddOverlayLink(self,srcOption,dstOption)
 return self:AddOptionLink("alert",srcOption,dstOption)

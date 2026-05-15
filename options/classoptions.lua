@@ -4,16 +4,16 @@ local default=true
 if (SAO.defaults.classes[classFile] and SAO.defaults.classes[classFile][optionType] and SAO.defaults.classes[classFile][optionType][auraID])then
 default=SAO.defaults.classes[classFile][optionType][auraID][id]
 end
-if (not SpellActivationOverlayDB.classes)then
-SpellActivationOverlayDB.classes={[classFile]={[optionType]={[auraID]={[id]=default}}}}
-elseif (not SpellActivationOverlayDB.classes[classFile])then
-SpellActivationOverlayDB.classes[classFile]={[optionType]={[auraID]={[id]=default}}}
-elseif (not SpellActivationOverlayDB.classes[classFile][optionType])then
-SpellActivationOverlayDB.classes[classFile][optionType]={[auraID]={[id]=default}}
-elseif (not SpellActivationOverlayDB.classes[classFile][optionType][auraID])then
-SpellActivationOverlayDB.classes[classFile][optionType][auraID]={[id]=default}
-elseif (type (SpellActivationOverlayDB.classes[classFile][optionType][auraID][id])=="nil")then
-SpellActivationOverlayDB.classes[classFile][optionType][auraID][id]=default
+if (not ProcSpellOverlayDB.classes)then
+ProcSpellOverlayDB.classes={[classFile]={[optionType]={[auraID]={[id]=default}}}}
+elseif (not ProcSpellOverlayDB.classes[classFile])then
+ProcSpellOverlayDB.classes[classFile]={[optionType]={[auraID]={[id]=default}}}
+elseif (not ProcSpellOverlayDB.classes[classFile][optionType])then
+ProcSpellOverlayDB.classes[classFile][optionType]={[auraID]={[id]=default}}
+elseif (not ProcSpellOverlayDB.classes[classFile][optionType][auraID])then
+ProcSpellOverlayDB.classes[classFile][optionType][auraID]={[id]=default}
+elseif (type (ProcSpellOverlayDB.classes[classFile][optionType][auraID][id])=="nil")then
+ProcSpellOverlayDB.classes[classFile][optionType][auraID][id]=default
 end
 end
 local function setSelectBoxEnabled(sb,enabled)
@@ -52,18 +52,18 @@ end
 end
 end
 local function createSelectBox(self,cb,classFile,optionType,auraID,id,subValues)
-local sb=CreateFrame("Frame", "OptionSubValues_"..optionType.."_"..auraID.."_"..id,SpellActivationOverlayOptionsPanel, "UIDropDownMenuTemplate")
+local sb=CreateFrame("Frame", "OptionSubValues_"..optionType.."_"..auraID.."_"..id,ProcSpellOverlayOptionsPanel, "UIDropDownMenuTemplate")
 UIDropDownMenu_Initialize(sb,function()
 local info=UIDropDownMenu_CreateInfo()
 info.func=function(self,arg1)
 setSelectBoxValue(sb,subValues,arg1)
-SpellActivationOverlayDB.classes[classFile][optionType][auraID][id]=arg1
+ProcSpellOverlayDB.classes[classFile][optionType][auraID][id]=arg1
 CloseDropDownMenus()
 end
 for _,obj in ipairs(subValues)do
 info.text=obj.text
 info.arg1=obj.value
-info.checked=SpellActivationOverlayDB.classes[classFile][optionType][auraID][id]==obj.value
+info.checked=ProcSpellOverlayDB.classes[classFile][optionType][auraID][id]==obj.value
 UIDropDownMenu_AddButton(info)
 end
 end)
@@ -74,14 +74,14 @@ widestText=obj.width
 end
 end
 UIDropDownMenu_SetWidth(sb,widestText*8+12)
-setSelectBoxValue(sb,subValues,SpellActivationOverlayDB.classes[classFile][optionType][auraID][id])
+setSelectBoxValue(sb,subValues,ProcSpellOverlayDB.classes[classFile][optionType][auraID][id])
 sb:SetPoint("TOP",cb, "TOP",0,4)
 sb:SetPoint("LEFT",cb.Text, "RIGHT",-12,0)
 return sb
 end
 function SAO.AddOption(self,optionType,auraID,id,subValues,applyTextFunc,testFunc,firstAnchor)
 local classFile=self.CurrentClass.Intrinsics[2]
-local cb=CreateFrame("CheckButton",nil,SpellActivationOverlayOptionsPanel, "InterfaceOptionsCheckButtonTemplate")
+local cb=CreateFrame("CheckButton",nil,ProcSpellOverlayOptionsPanel, "InterfaceOptionsCheckButtonTemplate")
 local sb
 if (type(subValues)=='table')then
 sb=createSelectBox(self,cb,classFile,optionType,auraID,id,subValues)
@@ -89,7 +89,7 @@ end
 cb.ApplyText=applyTextFunc
 cb.ApplyParentEnabling=function()
 local retryApplyText
-if (SpellActivationOverlayDB[optionType].enabled)then
+if (ProcSpellOverlayDB[optionType].enabled)then
 cb:SetEnabled(true)
 retryApplyText=cb:ApplyText()
 setSelectBoxEnabled(sb,true)
@@ -106,7 +106,7 @@ end
 end
 cb.ApplyValue=function()
 createOptionFor(classFile,optionType,auraID,id)
-local value=SpellActivationOverlayDB.classes[classFile][optionType][auraID][id]
+local value=ProcSpellOverlayDB.classes[classFile][optionType][auraID][id]
 cb:SetChecked(not not value)
 setSelectBoxEnabled(sb,not not value)
 setSelectBoxValue(sb,subValues,value)
@@ -116,10 +116,10 @@ cb:ApplyValue()
 cb:SetScript("PostClick",function()
 local checked=cb:GetChecked()
 if (sb)then
-SpellActivationOverlayDB.classes[classFile][optionType][auraID][id]=checked and sb.currentValue
+ProcSpellOverlayDB.classes[classFile][optionType][auraID][id]=checked and sb.currentValue
 setSelectBoxEnabled(sb,checked)
 else
-SpellActivationOverlayDB.classes[classFile][optionType][auraID][id]=checked
+ProcSpellOverlayDB.classes[classFile][optionType][auraID][id]=checked
 end
 local bucket=SAO:GetBucketBySpellID(auraID)
 if bucket then
@@ -136,21 +136,21 @@ cb.hoverFrame:SetScript("OnEnter",function() testFunc(true,cb,sb) end)
 cb.hoverFrame:SetScript("OnLeave",function() testFunc(false) end)
 cb.hoverFrame:SetMouseClickEnabled(false)
 end
-if (type(SpellActivationOverlayOptionsPanel.additionalCheckboxes[optionType])=="nil")then
+if (type(ProcSpellOverlayOptionsPanel.additionalCheckboxes[optionType])=="nil")then
 cb:SetPoint("TOPLEFT",firstAnchor.frame, "BOTTOMLEFT",firstAnchor.xOffset or 0,firstAnchor.yOffset or 0)
-SpellActivationOverlayOptionsPanel.additionalCheckboxes[optionType]={cb}
+ProcSpellOverlayOptionsPanel.additionalCheckboxes[optionType]={cb}
 else
-local nbCheckboxes=#SpellActivationOverlayOptionsPanel.additionalCheckboxes[optionType]
-local lastCheckBox=SpellActivationOverlayOptionsPanel.additionalCheckboxes[optionType][nbCheckboxes]
+local nbCheckboxes=#ProcSpellOverlayOptionsPanel.additionalCheckboxes[optionType]
+local lastCheckBox=ProcSpellOverlayOptionsPanel.additionalCheckboxes[optionType][nbCheckboxes]
 local maxNbGlowPerColumn=SAO:CanReport() and 13 or 14
 if optionType~="glow" or nbCheckboxes~=maxNbGlowPerColumn then
 cb:SetPoint("TOPLEFT",lastCheckBox, "BOTTOMLEFT",0,0)
 else
-local firstCb=SpellActivationOverlayOptionsPanel.additionalCheckboxes[optionType][1]
+local firstCb=ProcSpellOverlayOptionsPanel.additionalCheckboxes[optionType][1]
 firstCb:SetPoint("TOPLEFT",firstAnchor.frame, "BOTTOMLEFT",(firstAnchor.xOffset or 0) - 32,firstAnchor.yOffset or 0)
 cb:SetPoint("TOPLEFT",firstAnchor.frame, "BOTTOMLEFT",(firstAnchor.xOffset or 0) + 320,firstAnchor.yOffset or 0)
 end
-table.insert(SpellActivationOverlayOptionsPanel.additionalCheckboxes[optionType],cb)
+table.insert(ProcSpellOverlayOptionsPanel.additionalCheckboxes[optionType],cb)
 end
 return cb
 end
@@ -166,7 +166,7 @@ end
 function SAO.GetOptions(self,optionType,auraID)
 if (self.CurrentClass)then
 local classFile=self.CurrentClass.Intrinsics[2]
-local classOptions=SpellActivationOverlayDB and SpellActivationOverlayDB.classes and SpellActivationOverlayDB.classes[classFile]
+local classOptions=ProcSpellOverlayDB and ProcSpellOverlayDB.classes and ProcSpellOverlayDB.classes[classFile]
 if (classOptions and classOptions[optionType])then
 if (self.OptionLinks and self.OptionLinks[optionType] and self.OptionLinks[optionType][auraID])then
 return classOptions[optionType][self.OptionLinks[optionType][auraID]]

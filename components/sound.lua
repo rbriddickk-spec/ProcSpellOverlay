@@ -10,7 +10,7 @@ return
 end
 local willPlay,soundHandle
 if SAO.IsProject(SAO.ERA + SAO.TBC + SAO.WRATH + SAO.RETAIL)then
-willPlay,soundHandle=PlaySoundFile("Interface\\Addons\\SpellActivationOverlay\\sounds\\UI_PowerAura_Generic.ogg")
+willPlay,soundHandle=PlaySoundFile("Interface\\Addons\\ProcSpellOverlay\\sounds\\UI_PowerAura_Generic.ogg")
 else
 willPlay,soundHandle=PlaySound(SOUNDKIT.UI_POWER_AURA_GENERIC)
 end

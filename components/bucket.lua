@@ -309,7 +309,7 @@ local str=bucket.name..", "..
 SAO:Info(Module,str)
 end
 end
-function SpellActivationOverlay_DumpBuckets(spellID,devDump)
+function ProcSpellOverlay_DumpBuckets(spellID,devDump)
 if spellID then
 local bucket=SAO.RegisteredBucketsBySpellID[spellID]
 if bucket then
@@ -328,7 +328,7 @@ SAO:ForEachBucket(function(bucket)
 dumpOneBucket(bucket,devDump)
 end)
 end
-function SpellActivationOverlay_CheckBuckets(spellID)
+function ProcSpellOverlay_CheckBuckets(spellID)
 if spellID then
 local bucket=SAO:GetBucketBySpellID(spellID)
 if bucket then

@@ -36,8 +36,8 @@ function SAO.ADDON_LOADED(self,addOnName,containsBindings)
 if warnedSaoVsNecrosis then
 return
 end
-local iamSAO=strlower(AddonName)=="spellactivationoverlay"
-local itisSAO=strlower(addOnName)=="spellactivationoverlay"
+local iamSAO=strlower(AddonName)=="ProcSpellOverlay"
+local itisSAO=strlower(addOnName)=="ProcSpellOverlay"
 local iamNecrosis=strlower(AddonName):sub(0,8)=="necrosis"
 local itisNecrosis=strlower(addOnName):sub(0,8)=="necrosis"
 if (iamSAO and (itisNecrosis or itisSAO and NecrosisConfig)) or
@@ -62,7 +62,7 @@ self:Warn("==", "Necrosis Spell Activations will be disabled for this character 
 end
 end
 else
-self:Info("==", "You have installed Necrosis and SpellActivationOverlay at the same time.")
+self:Info("==", "You have installed Necrosis and ProcSpellOverlay at the same time.")
 self:Info("==", "Because you are playing "..className..", ".."Necrosis is not necessary.")
 end
 warnedSaoVsNecrosis=true
@@ -88,7 +88,7 @@ self.combatAnimOut:Stop()
 self.combatAnimIn:Play()
 for _,overlay in ipairs(self.combatOnlyOverlays)do
 overlay.combat.animOut:Stop()
-SpellActivationOverlayFrame_PlayCombatAnimIn(overlay.combat.animIn)
+ProcSpellOverlayFrame_PlayCombatAnimIn(overlay.combat.animIn)
 end
 end
 end
@@ -98,7 +98,7 @@ self.combatAnimIn:Stop()
 self.combatAnimOut:Play()
 for _,overlay in ipairs(self.combatOnlyOverlays)do
 overlay.combat.animIn:Stop()
-SpellActivationOverlayFrame_PlayCombatAnimOut(overlay.combat.animOut)
+ProcSpellOverlayFrame_PlayCombatAnimOut(overlay.combat.animOut)
 end
 end
 end

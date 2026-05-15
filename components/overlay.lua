@@ -1,10 +1,10 @@
 local AddonName,SAO=...
 local Module="overlay"
 local function discardedByOverlayOption(self,auraID,optionIndex,optionAnyStacks)
-if (not SpellActivationOverlayDB)then
+if (not ProcSpellOverlayDB)then
 return false
 end
-if (SpellActivationOverlayDB.alert and not SpellActivationOverlayDB.alert.enabled)then
+if (ProcSpellOverlayDB.alert and not ProcSpellOverlayDB.alert.enabled)then
 return true
 end
 local overlayOptions=self:GetOverlayOptions(auraID)

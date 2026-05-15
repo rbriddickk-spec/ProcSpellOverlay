@@ -1,15 +1,15 @@
 local AddonName,SAO=...
 local iamNecrosis=strlower(AddonName):sub(0,8)=="necrosis"
 local GetAddOnMetadata=C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
-function SpellActivationOverlayOptionsPanel_Init(self)
+function ProcSpellOverlayOptionsPanel_Init(self)
 local shutdownCategory=SAO.Shutdown:GetCategory()
 if shutdownCategory then
 if shutdownCategory.Reason then
-local globalOffReason=SpellActivationOverlayOptionsPanel.globalOff.reason
+local globalOffReason=ProcSpellOverlayOptionsPanel.globalOff.reason
 globalOffReason:SetText("("..shutdownCategory.Reason..")")
 end
 if shutdownCategory.Button then
-local globalOffButton=SpellActivationOverlayOptionsPanel.globalOff.button
+local globalOffButton=ProcSpellOverlayOptionsPanel.globalOff.button
 globalOffButton:SetText(shutdownCategory.Button.Text)
 local estimatedWidth=(2+strlenutf8(shutdownCategory.Button.Text))*8
 globalOffButton:SetWidth(estimatedWidth)
@@ -21,19 +21,19 @@ globalOffButton:Show()
 end
 if shutdownCategory.DisableCondition then
 local disableCondition=SAO.Shutdown:GetCategory().DisableCondition
-local disableConditionButton=SpellActivationOverlayOptionsPanelDisableConditionButton
+local disableConditionButton=ProcSpellOverlayOptionsPanelDisableConditionButton
 disableConditionButton.Text:SetText(disableCondition.Text)
 disableConditionButton.OnValueChanged=function(self,checked)
 if checked then
 disableCondition.OnValueChanged(self,true)
-SpellActivationOverlayOptionsPanel.globalOff:Show()
-local testButton=SpellActivationOverlayOptionsPanelSpellAlertTestButton
+ProcSpellOverlayOptionsPanel.globalOff:Show()
+local testButton=ProcSpellOverlayOptionsPanelSpellAlertTestButton
 if testButton.isTesting then
 testButton:StopTest()
 end
 else
 disableCondition.OnValueChanged(self,false)
-SpellActivationOverlayOptionsPanel.globalOff:Hide()
+ProcSpellOverlayOptionsPanel.globalOff:Hide()
 end
 end
 disableConditionButton:SetChecked(SAO.Shutdown:IsAddonDisabled())
@@ -42,16 +42,16 @@ if disableCondition.ShowIf==nil or disableCondition.ShowIf()then
 disableConditionButton:Show()
 end
 else
-SpellActivationOverlayOptionsPanel.globalOff:Show()
+ProcSpellOverlayOptionsPanel.globalOff:Show()
 end
 end
 local mustDisableGlowForEveryone=false
 if not shutdownCategory and mustDisableGlowForEveryone then
-SpellActivationOverlayOptionsPanel.glowOff:Show()
+ProcSpellOverlayOptionsPanel.glowOff:Show()
 else
-SpellActivationOverlayOptionsPanel.glowOff:Hide()
+ProcSpellOverlayOptionsPanel.glowOff:Hide()
 end
-local buildInfoLabel=SpellActivationOverlayOptionsPanelBuildInfo
+local buildInfoLabel=ProcSpellOverlayOptionsPanelBuildInfo
 local xSaoBuild=GetAddOnMetadata(AddonName, "X-SAO-Build")
 if type(xSaoBuild)=='string' and #xSaoBuild > 0 then
 local titleText=GetAddOnMetadata(AddonName, "Title")
@@ -104,7 +104,7 @@ end
 buildInfoLabel:SetText(titleText.."\n"..optimizedForText)
 end
 end
-local classInfoLabel=SpellActivationOverlayOptionsPanelClassInfo
+local classInfoLabel=ProcSpellOverlayOptionsPanelClassInfo
 if SAO.CurrentClass then
 local className,classFile,classId=SAO.CurrentClass.Intrinsics[1],SAO.CurrentClass.Intrinsics[2],SAO.CurrentClass.Intrinsics[3]
 local gradientColors
@@ -150,67 +150,67 @@ classInfoLabel:SetText(string.format("|T%s:16:16:0:0:512:512:32:480:32:480|t %s"
 else
 classInfoLabel:SetText("")
 end
-local opacitySlider=SpellActivationOverlayOptionsPanelSpellAlertOpacitySlider
+local opacitySlider=ProcSpellOverlayOptionsPanelSpellAlertOpacitySlider
 opacitySlider.Text:SetText(SPELL_ALERT_OPACITY)
 _G[opacitySlider:GetName().."Low"]:SetText(OFF)
 opacitySlider:SetMinMaxValues(0,1)
 opacitySlider:SetValueStep(0.05)
-opacitySlider.initialValue=SpellActivationOverlayDB.alert.opacity
+opacitySlider.initialValue=ProcSpellOverlayDB.alert.opacity
 opacitySlider:SetValue(opacitySlider.initialValue)
 opacitySlider.ApplyValueToEngine=function(self,value)
-SpellActivationOverlayDB.alert.opacity=value
-SpellActivationOverlayDB.alert.enabled=value > 0
+ProcSpellOverlayDB.alert.opacity=value
+ProcSpellOverlayDB.alert.enabled=value > 0
 SAO:ApplySpellAlertOpacity()
 end
-local scaleSlider=SpellActivationOverlayOptionsPanelSpellAlertScaleSlider
+local scaleSlider=ProcSpellOverlayOptionsPanelSpellAlertScaleSlider
 scaleSlider.Text:SetText("Spell Alert Scale")
 _G[scaleSlider:GetName().."Low"]:SetText(SMALL)
 _G[scaleSlider:GetName().."High"]:SetText(LARGE)
 scaleSlider:SetMinMaxValues(0.25,2.5)
 scaleSlider:SetValueStep(0.05)
-scaleSlider.initialValue=SpellActivationOverlayDB.alert.scale
+scaleSlider.initialValue=ProcSpellOverlayDB.alert.scale
 scaleSlider:SetValue(scaleSlider.initialValue)
 scaleSlider.ApplyValueToEngine=function(self,value)
-SpellActivationOverlayDB.alert.scale=value
+ProcSpellOverlayDB.alert.scale=value
 SAO:ApplySpellAlertGeometry()
 end
-local offsetSlider=SpellActivationOverlayOptionsPanelSpellAlertOffsetSlider
+local offsetSlider=ProcSpellOverlayOptionsPanelSpellAlertOffsetSlider
 offsetSlider.Text:SetText("Spell Alert Offset")
 _G[offsetSlider:GetName().."Low"]:SetText(NEAR)
 _G[offsetSlider:GetName().."High"]:SetText(FAR)
 offsetSlider:SetMinMaxValues(-200,400)
 offsetSlider:SetValueStep(20)
-offsetSlider.initialValue=SpellActivationOverlayDB.alert.offset
+offsetSlider.initialValue=ProcSpellOverlayDB.alert.offset
 offsetSlider:SetValue(offsetSlider.initialValue)
 offsetSlider.ApplyValueToEngine=function(self,value)
-SpellActivationOverlayDB.alert.offset=value
+ProcSpellOverlayDB.alert.offset=value
 SAO:ApplySpellAlertGeometry()
 end
-local timerSlider=SpellActivationOverlayOptionsPanelSpellAlertTimerSlider
+local timerSlider=ProcSpellOverlayOptionsPanelSpellAlertTimerSlider
 timerSlider.Text:SetText("Spell Alert Progressive Timer")
 _G[timerSlider:GetName().."Low"]:SetText(DISABLE)
 _G[timerSlider:GetName().."High"]:SetText(ENABLE)
 timerSlider:SetMinMaxValues(0,1)
 timerSlider:SetValueStep(1)
-timerSlider.initialValue=SpellActivationOverlayDB.alert.timer
+timerSlider.initialValue=ProcSpellOverlayDB.alert.timer
 timerSlider:SetValue(timerSlider.initialValue)
 timerSlider.ApplyValueToEngine=function(self,value)
-SpellActivationOverlayDB.alert.timer=value
+ProcSpellOverlayDB.alert.timer=value
 SAO:ApplySpellAlertTimer()
 end
-local soundSlider=SpellActivationOverlayOptionsPanelSpellAlertSoundSlider
+local soundSlider=ProcSpellOverlayOptionsPanelSpellAlertSoundSlider
 soundSlider.Text:SetText("Spell Alert Sound Effect")
 _G[soundSlider:GetName().."Low"]:SetText(DISABLE)
 _G[soundSlider:GetName().."High"]:SetText(ENABLE)
 soundSlider:SetMinMaxValues(0,1)
 soundSlider:SetValueStep(1)
-soundSlider.initialValue=SpellActivationOverlayDB.alert.sound
+soundSlider.initialValue=ProcSpellOverlayDB.alert.sound
 soundSlider:SetValue(soundSlider.initialValue)
 soundSlider.ApplyValueToEngine=function(self,value)
-SpellActivationOverlayDB.alert.sound=value
+ProcSpellOverlayDB.alert.sound=value
 SAO:ApplySpellAlertSound()
 end
-local testButton=SpellActivationOverlayOptionsPanelSpellAlertTestButton
+local testButton=ProcSpellOverlayOptionsPanelSpellAlertTestButton
 testButton:SetText("Toggle Test")
 testButton.fakeSpellID=42
 testButton.isTesting=false
@@ -226,7 +226,7 @@ self.testTimerTicker=C_Timer.NewTicker(4.9,
 function()
 SAO:RefreshOverlayTimer(self.fakeSpellID,GetTime()+5)
 end)
-SpellActivationOverlayFrame_SetForceAlpha1(true)
+ProcSpellOverlayFrame_SetForceAlpha1(true)
 end
 end
 testButton.StopTest=function(self)
@@ -234,90 +234,90 @@ if (self.isTesting)then
 self.isTesting=false
 self.testTimerTicker:Cancel()
 SAO:DeactivateOverlay(self.fakeSpellID)
-SpellActivationOverlayFrame_SetForceAlpha1(false)
+ProcSpellOverlayFrame_SetForceAlpha1(false)
 end
 end
-testButton:SetEnabled(SpellActivationOverlayDB.alert.enabled)
+testButton:SetEnabled(ProcSpellOverlayDB.alert.enabled)
 SAO:MarkTexture(testTextureLeftRight)
 SAO:MarkTexture(testTextureTop)
-local debugButton=SpellActivationOverlayOptionsPanelSpellAlertDebugButton
+local debugButton=ProcSpellOverlayOptionsPanelSpellAlertDebugButton
 debugButton.Text:SetText(SAO:optionDebugToChatbox())
-debugButton:SetChecked(SpellActivationOverlayDB.debug==true)
-local reportButton=SpellActivationOverlayOptionsPanelSpellAlertReportButton
+debugButton:SetChecked(ProcSpellOverlayDB.debug==true)
+local reportButton=ProcSpellOverlayOptionsPanelSpellAlertReportButton
 if SAO:CanReport()then
 reportButton.Text:SetText(SAO:reportUnsupportedOverlays())
-reportButton:SetChecked(SpellActivationOverlayDB.report~=false)
+reportButton:SetChecked(ProcSpellOverlayDB.report~=false)
 else
 reportButton:Hide()
 end
-local responsiveButton=SpellActivationOverlayOptionsPanelSpellAlertResponsiveButton
+local responsiveButton=ProcSpellOverlayOptionsPanelSpellAlertResponsiveButton
 responsiveButton.Text:SetText(SAO:responsiveMode())
-responsiveButton:SetChecked(SpellActivationOverlayDB.responsiveMode==true)
-local askDisableGameAlertButton=SpellActivationOverlayOptionsPanelSpellAlertAskDisableGameAlertButton
+responsiveButton:SetChecked(ProcSpellOverlayDB.responsiveMode==true)
+local askDisableGameAlertButton=ProcSpellOverlayOptionsPanelSpellAlertAskDisableGameAlertButton
 if SAO:IsQuestionPossible(SAO.QUESTIONS.DISABLE_GAME_ALERT)then
 askDisableGameAlertButton:Show()
 askDisableGameAlertButton.Text:SetText(SAO:askToDisableGameAlerts())
-askDisableGameAlertButton:SetChecked(not SpellActivationOverlayDB.questions or SpellActivationOverlayDB.questions.disableGameAlert~="no")
+askDisableGameAlertButton:SetChecked(not ProcSpellOverlayDB.questions or ProcSpellOverlayDB.questions.disableGameAlert~="no")
 askDisableGameAlertButton.OnValueChanged=function(self,checked)
-SpellActivationOverlayDB.questions=SpellActivationOverlayDB.questions or {}
+ProcSpellOverlayDB.questions=ProcSpellOverlayDB.questions or {}
 if checked then
-SpellActivationOverlayDB.questions.disableGameAlert=nil
+ProcSpellOverlayDB.questions.disableGameAlert=nil
 SAO:AskQuestion(SAO.QUESTIONS.DISABLE_GAME_ALERT)
 else
-SpellActivationOverlayDB.questions.disableGameAlert="no"
+ProcSpellOverlayDB.questions.disableGameAlert="no"
 SAO:CancelQuestion(SAO.QUESTIONS.DISABLE_GAME_ALERT)
 end
 end
 else
 askDisableGameAlertButton:Hide()
-local anchorBuildInfo={SpellActivationOverlayOptionsPanelBuildInfo:GetPoint(1)}
-SpellActivationOverlayOptionsPanelBuildInfo:SetPoint(anchorBuildInfo[1],anchorBuildInfo[2],anchorBuildInfo[3],anchorBuildInfo[4],anchorBuildInfo[5] - 24)
+local anchorBuildInfo={ProcSpellOverlayOptionsPanelBuildInfo:GetPoint(1)}
+ProcSpellOverlayOptionsPanelBuildInfo:SetPoint(anchorBuildInfo[1],anchorBuildInfo[2],anchorBuildInfo[3],anchorBuildInfo[4],anchorBuildInfo[5] - 24)
 end
-local glowingButtonCheckbox=SpellActivationOverlayOptionsPanelGlowingButtons
+local glowingButtonCheckbox=ProcSpellOverlayOptionsPanelGlowingButtons
 glowingButtonCheckbox.Text:SetText("Glowing Buttons")
-glowingButtonCheckbox.initialValue=SpellActivationOverlayDB.glow.enabled
+glowingButtonCheckbox.initialValue=ProcSpellOverlayDB.glow.enabled
 glowingButtonCheckbox:SetChecked(glowingButtonCheckbox.initialValue)
 glowingButtonCheckbox.ApplyValueToEngine=function(self,checked)
-SpellActivationOverlayDB.glow.enabled=checked
-for _,checkbox in ipairs(SpellActivationOverlayOptionsPanel.additionalCheckboxes.glow or {})do
+ProcSpellOverlayDB.glow.enabled=checked
+for _,checkbox in ipairs(ProcSpellOverlayOptionsPanel.additionalCheckboxes.glow or {})do
 checkbox:ApplyParentEnabling()
 end
 SAO:ApplyGlowingButtonsToggle()
 end
-local classOptions=SpellActivationOverlayDB.classes and SAO.CurrentClass and SpellActivationOverlayDB.classes[SAO.CurrentClass.Intrinsics[2]]
+local classOptions=ProcSpellOverlayDB.classes and SAO.CurrentClass and ProcSpellOverlayDB.classes[SAO.CurrentClass.Intrinsics[2]]
 if (classOptions)then
-SpellActivationOverlayOptionsPanel.classOptions={initialValue=CopyTable(classOptions)}
+ProcSpellOverlayOptionsPanel.classOptions={initialValue=CopyTable(classOptions)}
 else
-SpellActivationOverlayOptionsPanel.classOptions={initialValue={}}
+ProcSpellOverlayOptionsPanel.classOptions={initialValue={}}
 end
-SpellActivationOverlayOptionsPanel.additionalCheckboxes={}
+ProcSpellOverlayOptionsPanel.additionalCheckboxes={}
 end
 local function okayFunc(self)
-local opacitySlider=SpellActivationOverlayOptionsPanelSpellAlertOpacitySlider
+local opacitySlider=ProcSpellOverlayOptionsPanelSpellAlertOpacitySlider
 opacitySlider.initialValue=opacitySlider:GetValue()
-local scaleSlider=SpellActivationOverlayOptionsPanelSpellAlertScaleSlider
+local scaleSlider=ProcSpellOverlayOptionsPanelSpellAlertScaleSlider
 scaleSlider.initialValue=scaleSlider:GetValue()
-local offsetSlider=SpellActivationOverlayOptionsPanelSpellAlertOffsetSlider
+local offsetSlider=ProcSpellOverlayOptionsPanelSpellAlertOffsetSlider
 offsetSlider.initialValue=offsetSlider:GetValue()
-local timerSlider=SpellActivationOverlayOptionsPanelSpellAlertTimerSlider
+local timerSlider=ProcSpellOverlayOptionsPanelSpellAlertTimerSlider
 timerSlider.initialValue=timerSlider:GetValue()
-local soundSlider=SpellActivationOverlayOptionsPanelSpellAlertSoundSlider
+local soundSlider=ProcSpellOverlayOptionsPanelSpellAlertSoundSlider
 soundSlider.initialValue=soundSlider:GetValue()
-local glowingButtonCheckbox=SpellActivationOverlayOptionsPanelGlowingButtons
+local glowingButtonCheckbox=ProcSpellOverlayOptionsPanelGlowingButtons
 glowingButtonCheckbox.initialValue=glowingButtonCheckbox:GetChecked()
-local classOptions=SpellActivationOverlayDB.classes and SAO.CurrentClass and SpellActivationOverlayDB.classes[SAO.CurrentClass.Intrinsics[2]]
+local classOptions=ProcSpellOverlayDB.classes and SAO.CurrentClass and ProcSpellOverlayDB.classes[SAO.CurrentClass.Intrinsics[2]]
 if (classOptions)then
-SpellActivationOverlayOptionsPanel.classOptions.initialValue=CopyTable(classOptions)
+ProcSpellOverlayOptionsPanel.classOptions.initialValue=CopyTable(classOptions)
 end
 end
 local function cancelFunc(self)
-local opacitySlider=SpellActivationOverlayOptionsPanelSpellAlertOpacitySlider
-local scaleSlider=SpellActivationOverlayOptionsPanelSpellAlertScaleSlider
-local offsetSlider=SpellActivationOverlayOptionsPanelSpellAlertOffsetSlider
-local timerSlider=SpellActivationOverlayOptionsPanelSpellAlertTimerSlider
-local soundSlider=SpellActivationOverlayOptionsPanelSpellAlertSoundSlider
-local glowingButtonCheckbox=SpellActivationOverlayOptionsPanelGlowingButtons
-local classOptions=SpellActivationOverlayOptionsPanel.classOptions
+local opacitySlider=ProcSpellOverlayOptionsPanelSpellAlertOpacitySlider
+local scaleSlider=ProcSpellOverlayOptionsPanelSpellAlertScaleSlider
+local offsetSlider=ProcSpellOverlayOptionsPanelSpellAlertOffsetSlider
+local timerSlider=ProcSpellOverlayOptionsPanelSpellAlertTimerSlider
+local soundSlider=ProcSpellOverlayOptionsPanelSpellAlertSoundSlider
+local glowingButtonCheckbox=ProcSpellOverlayOptionsPanelGlowingButtons
+local classOptions=ProcSpellOverlayOptionsPanel.classOptions
 self:applyAll(
 opacitySlider.initialValue,
 scaleSlider.initialValue,
@@ -341,55 +341,55 @@ defaultClassOptions
 )
 end
 local function applyAllFunc(self,opacityValue,scaleValue,offsetValue,timerValue,soundValue,isGlowEnabled,classOptions)
-local opacitySlider=SpellActivationOverlayOptionsPanelSpellAlertOpacitySlider
+local opacitySlider=ProcSpellOverlayOptionsPanelSpellAlertOpacitySlider
 opacitySlider:SetValue(opacityValue)
-if (SpellActivationOverlayDB.alert.opacity~=opacityValue)then
-SpellActivationOverlayDB.alert.opacity=opacityValue
-SpellActivationOverlayDB.alert.enabled=opacityValue > 0
+if (ProcSpellOverlayDB.alert.opacity~=opacityValue)then
+ProcSpellOverlayDB.alert.opacity=opacityValue
+ProcSpellOverlayDB.alert.enabled=opacityValue > 0
 SAO:ApplySpellAlertOpacity()
 end
 local geometryChanged=false
-local scaleSlider=SpellActivationOverlayOptionsPanelSpellAlertScaleSlider
+local scaleSlider=ProcSpellOverlayOptionsPanelSpellAlertScaleSlider
 scaleSlider:SetValue(scaleValue)
-if (SpellActivationOverlayDB.alert.scale~=scaleValue)then
-SpellActivationOverlayDB.alert.scale=scaleValue
+if (ProcSpellOverlayDB.alert.scale~=scaleValue)then
+ProcSpellOverlayDB.alert.scale=scaleValue
 geometryChanged=true
 end
-local offsetSlider=SpellActivationOverlayOptionsPanelSpellAlertOffsetSlider
+local offsetSlider=ProcSpellOverlayOptionsPanelSpellAlertOffsetSlider
 offsetSlider:SetValue(offsetValue)
-if (SpellActivationOverlayDB.alert.offset~=offsetValue)then
-SpellActivationOverlayDB.alert.offset=offsetValue
+if (ProcSpellOverlayDB.alert.offset~=offsetValue)then
+ProcSpellOverlayDB.alert.offset=offsetValue
 geometryChanged=true
 end
 if (geometryChanged)then
 SAO:ApplySpellAlertGeometry()
 end
-local timerSlider=SpellActivationOverlayOptionsPanelSpellAlertTimerSlider
+local timerSlider=ProcSpellOverlayOptionsPanelSpellAlertTimerSlider
 timerSlider:SetValue(timerValue)
-if (SpellActivationOverlayDB.alert.timer~=timerValue)then
-SpellActivationOverlayDB.alert.timer=timerValue
+if (ProcSpellOverlayDB.alert.timer~=timerValue)then
+ProcSpellOverlayDB.alert.timer=timerValue
 SAO:ApplySpellAlertTimer()
 end
-local soundSlider=SpellActivationOverlayOptionsPanelSpellAlertSoundSlider
+local soundSlider=ProcSpellOverlayOptionsPanelSpellAlertSoundSlider
 soundSlider:SetValue(soundValue)
-if (SpellActivationOverlayDB.alert.sound~=soundValue)then
-SpellActivationOverlayDB.alert.sound=soundValue
+if (ProcSpellOverlayDB.alert.sound~=soundValue)then
+ProcSpellOverlayDB.alert.sound=soundValue
 SAO:ApplySpellAlertSound()
 end
-local testButton=SpellActivationOverlayOptionsPanelSpellAlertTestButton
-testButton:SetEnabled(SpellActivationOverlayDB.alert.enabled)
-local glowingButtonCheckbox=SpellActivationOverlayOptionsPanelGlowingButtons
+local testButton=ProcSpellOverlayOptionsPanelSpellAlertTestButton
+testButton:SetEnabled(ProcSpellOverlayDB.alert.enabled)
+local glowingButtonCheckbox=ProcSpellOverlayOptionsPanelGlowingButtons
 glowingButtonCheckbox:SetChecked(isGlowEnabled)
-if (SpellActivationOverlayDB.glow.enabled~=isGlowEnabled)then
-SpellActivationOverlayDB.glow.enabled=isGlowEnabled
+if (ProcSpellOverlayDB.glow.enabled~=isGlowEnabled)then
+ProcSpellOverlayDB.glow.enabled=isGlowEnabled
 glowingButtonCheckbox:ApplyValueToEngine(isGlowEnabled)
 end
-if (SpellActivationOverlayDB.classes and SAO.CurrentClass and SpellActivationOverlayDB.classes[SAO.CurrentClass.Intrinsics[2]] and classOptions)then
-SpellActivationOverlayDB.classes[SAO.CurrentClass.Intrinsics[2]]=CopyTable(classOptions)
-for _,checkbox in ipairs(SpellActivationOverlayOptionsPanel.additionalCheckboxes.alert or {})do
+if (ProcSpellOverlayDB.classes and SAO.CurrentClass and ProcSpellOverlayDB.classes[SAO.CurrentClass.Intrinsics[2]] and classOptions)then
+ProcSpellOverlayDB.classes[SAO.CurrentClass.Intrinsics[2]]=CopyTable(classOptions)
+for _,checkbox in ipairs(ProcSpellOverlayOptionsPanel.additionalCheckboxes.alert or {})do
 checkbox:ApplyValue()
 end
-for _,checkbox in ipairs(SpellActivationOverlayOptionsPanel.additionalCheckboxes.glow or {})do
+for _,checkbox in ipairs(ProcSpellOverlayOptionsPanel.additionalCheckboxes.glow or {})do
 checkbox:ApplyValue()
 end
 end
@@ -422,7 +422,7 @@ return Settings.OpenToCategory(categoryIDOrFrame)
 end
 end
 end
-function SpellActivationOverlayOptionsPanel_OnLoad(self)
+function ProcSpellOverlayOptionsPanel_OnLoad(self)
 self.name=AddonName
 self.okay=okayFunc
 self.cancel=cancelFunc
@@ -432,7 +432,7 @@ InterfaceOptions_AddCategory(self)
 SAO.OptionsPanel=self
 end
 local optionsLoaded=false
-function SpellActivationOverlayOptionsPanel_OnShow(self)
+function ProcSpellOverlayOptionsPanel_OnShow(self)
 if optionsLoaded then
 return
 end
@@ -443,21 +443,21 @@ end
 end
 SAO:AddEffectOptions()
 for _,optionType in ipairs({"alert", "glow"})do
-if (type(SpellActivationOverlayOptionsPanel.additionalCheckboxes[optionType])=="nil")then
+if (type(ProcSpellOverlayOptionsPanel.additionalCheckboxes[optionType])=="nil")then
 local className=SAO.CurrentClass and SAO.CurrentClass.Intrinsics[1] or select(1,UnitClass("player"))
 local classFile=SAO.CurrentClass and SAO.CurrentClass.Intrinsics[2] or select(2,UnitClass("player"))
 local dimFactor=0.7
 local dimmedTextColor=CreateColor(dimFactor,dimFactor,dimFactor)
 local dimmedClassColor=CreateColor(dimFactor*RAID_CLASS_COLORS[classFile].r,dimFactor*RAID_CLASS_COLORS[classFile].g,dimFactor*RAID_CLASS_COLORS[classFile].b)
 local text=WrapTextInColor(string.format("%s (%s)",NONE,WrapTextInColor(className,dimmedClassColor)),dimmedTextColor)
-SpellActivationOverlayOptionsPanel[optionType.."None"]:SetText(text)
+ProcSpellOverlayOptionsPanel[optionType.."None"]:SetText(text)
 end
 end
 optionsLoaded=true
 end
 if not iamNecrosis then
 SLASH_SAO1="/sao"
-SLASH_SAO2="/spellactivationoverlay"
+SLASH_SAO2="/ProcSpellOverlay"
 SlashCmdList.SAO=function(msg,editBox)
 InterfaceOptionsFrame_OpenToCategory(SAO.OptionsPanel)
 InterfaceOptionsFrame_OpenToCategory(SAO.OptionsPanel)

@@ -110,7 +110,7 @@ SAO:Info(Module,SAO:migratedOptions("2.5.7"))
 end
 function SAO.LoadDB(self)
 local currentversion=257
-local db=SpellActivationOverlayDB or {}
+local db=ProcSpellOverlayDB or {}
 if not db.alert then
 db.alert={}
 end
@@ -179,14 +179,14 @@ if not db.version or db.version < 257 then
 migrateTo257(db)
 end
 db.version=currentversion
-SpellActivationOverlayDB=db
+ProcSpellOverlayDB=db
 for _,classDef in ipairs({SAO.CurrentClass,SAO.SharedClass})do
 if classDef then
 classDef.Register(SAO)
 end
 end
 end
-local loader=CreateFrame("Frame", "SpellActivationOverlayDBLoader")
+local loader=CreateFrame("Frame", "ProcSpellOverlayDBLoader")
 local loadingState={
 loaded=false,
 questionsAsked=false,
@@ -201,7 +201,7 @@ SAO:AskQuestionsAtStart()
 loadingState.questionsAsked=true
 SAO:ApplyAllVariables()
 loadingState.variablesApplied=true
-SpellActivationOverlayOptionsPanel_Init(SAO.OptionsPanel)
+ProcSpellOverlayOptionsPanel_Init(SAO.OptionsPanel)
 loadingState.optionsPanelInitialized=true
 loader:UnregisterEvent("VARIABLES_LOADED")
 end)

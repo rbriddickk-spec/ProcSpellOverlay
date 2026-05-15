@@ -13,7 +13,7 @@ end
 end
 addQuestion(SAO.QUESTIONS.DISABLE_GAME_ALERT,{
 props={
-displayGameSaoVar="displaySpellActivationOverlays",
+displayGameSaoVar="displayProcSpellOverlays",
 staticPopupDialog="SAO_DISABLE_GAME_ALERT",
 },
 isPossible=function(self)
@@ -22,12 +22,12 @@ and C_CVar.GetCVarInfo(self.props.displayGameSaoVar)~=nil
 end,
 isRelevantNow=function(self)
 return C_CVar.GetCVarBool(self.props.displayGameSaoVar)
-and SpellActivationOverlayDB.alert.enabled
+and ProcSpellOverlayDB.alert.enabled
 end,
 mayAskAtStart=function(self)
 return (
-SpellActivationOverlayDB.questions.disableGameAlert==nil
-or SpellActivationOverlayDB.questions.disableGameAlert=="yes" -- Ask again if the user already answered "yes"
+ProcSpellOverlayDB.questions.disableGameAlert==nil
+or ProcSpellOverlayDB.questions.disableGameAlert=="yes" -- Ask again if the user already answered "yes"
 )
 end,
 ask=function(self)
@@ -53,24 +53,24 @@ end
 end,
 OnAccept=function(self)
 SetCVar(displayGameSaoVar,false)
-SpellActivationOverlayDB.questions.disableGameAlert="yes"
-SpellActivationOverlayOptionsPanelSpellAlertAskDisableGameAlertButton:SetChecked(true)
+ProcSpellOverlayDB.questions.disableGameAlert="yes"
+ProcSpellOverlayOptionsPanelSpellAlertAskDisableGameAlertButton:SetChecked(true)
 SAO:Info(Module,SAO:gameSpellAlertsDisabled().."\n"..SAO:gameSpellAlertsChangeLater(optionSequence))
 end,
 OnCancel=function(self)
-SpellActivationOverlayDB.questions.disableGameAlert="no"
-SpellActivationOverlayOptionsPanelSpellAlertAskDisableGameAlertButton:SetChecked(false)
+ProcSpellOverlayDB.questions.disableGameAlert="no"
+ProcSpellOverlayOptionsPanelSpellAlertAskDisableGameAlertButton:SetChecked(false)
 SAO:Info(Module,SAO:gameSpellAlertsLeftAsIs().."\n"..SAO:gameSpellAlertsChangeLater(optionSequence))
 end,
 whileDead=true,
-customAlertIcon="Interface/Addons/SpellActivationOverlay/textures/rkm128",
+customAlertIcon="Interface/Addons/ProcSpellOverlay/textures/rkm128",
 hideOnEscape=true,
 noCancelOnEscape=true,
 timeout=0,
 preferredindex=STATICPOPUP_NUMDIALOGS
 }
 end
-StaticPopup_Show(self.props.staticPopupDialog,nil,nil,{answered=SpellActivationOverlayDB.questions.disableGameAlert})
+StaticPopup_Show(self.props.staticPopupDialog,nil,nil,{answered=ProcSpellOverlayDB.questions.disableGameAlert})
 end,
 cancel=function(self)
 if StaticPopupDialogs[self.props.staticPopupDialog] then

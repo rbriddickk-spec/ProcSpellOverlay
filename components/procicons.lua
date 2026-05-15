@@ -5,9 +5,9 @@ local Module = "procicons"
 -- Shows up to 2 large icons based on SPELL_ACTIVATION_OVERLAY_SHOW/HIDE.
 
 local function db()
-  SpellActivationOverlayDB = SpellActivationOverlayDB or {}
-  SpellActivationOverlayDB.procIcons = SpellActivationOverlayDB.procIcons or {}
-  local p = SpellActivationOverlayDB.procIcons
+  ProcSpellOverlayDB = ProcSpellOverlayDB or {}
+  ProcSpellOverlayDB.procIcons = ProcSpellOverlayDB.procIcons or {}
+  local p = ProcSpellOverlayDB.procIcons
 
   if p.enabled == nil then p.enabled = true end
   if p.locked == nil then p.locked = true end

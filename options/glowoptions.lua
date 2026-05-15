@@ -62,7 +62,7 @@ else
 self:RemoveGlow(fakeOffset+spellID)
 end
 end
-self:AddOption("glow",spellID,glowID,type(variants)=='table' and variants.values,applyTextFunc,testFunc,{frame=SpellActivationOverlayOptionsPanelGlowingButtons,xOffset=16,yOffset=2})
+self:AddOption("glow",spellID,glowID,type(variants)=='table' and variants.values,applyTextFunc,testFunc,{frame=ProcSpellOverlayOptionsPanelGlowingButtons,xOffset=16,yOffset=2})
 end
 function SAO.AddGlowingLink(self,srcOption,dstOption)
 return self:AddOptionLink("glow",srcOption,dstOption)

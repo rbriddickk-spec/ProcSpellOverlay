@@ -152,7 +152,7 @@ frame.__sao.DisableGlow()
 end,
 }
 if SAO.IsProject(SAO.CATA_AND_ONWARD)then
-local GlowEngineFrame=CreateFrame("Frame", "SpellActivationOverlayGlowEngineFrame")
+local GlowEngineFrame=CreateFrame("Frame", "ProcSpellOverlayGlowEngineFrame")
 SAO:RegisterEventHandler(GlowEngineFrame, "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", "Static initializer: "..Module)
 SAO:RegisterEventHandler(GlowEngineFrame, "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", "Static initializer: "..Module)
 GlowEngineFrame:SetScript("OnEvent",function (self,event,spellID)
@@ -220,7 +220,7 @@ end
 local wasGlowing=oldGlowID and (self.GlowingSpells[oldGlowID]~=nil)
 local mustGlow=newGlowID and (self.GlowingSpells[newGlowID]~=nil)
 if (not wasGlowing and mustGlow)then
-if (not SpellActivationOverlayDB or not SpellActivationOverlayDB.glow or SpellActivationOverlayDB.glow.enabled)then
+if (not ProcSpellOverlayDB or not ProcSpellOverlayDB.glow or ProcSpellOverlayDB.glow.enabled)then
 EnableGlow(button,newGlowID, "action button update (was "..tostring(oldGlowID)..")")
 end
 elseif (wasGlowing and not mustGlow)then
@@ -319,7 +319,7 @@ self.GlowingSpells[glowID][spellID]=true
 else
 self.GlowingSpells[glowID]={[spellID]=true}
 for _,frame in pairs(actionButtons or {})do
-if (not SpellActivationOverlayDB or not SpellActivationOverlayDB.glow or SpellActivationOverlayDB.glow.enabled)then
+if (not ProcSpellOverlayDB or not ProcSpellOverlayDB.glow or ProcSpellOverlayDB.glow.enabled)then
 if not frame.__sao then
 SAO:Debug(Module, "Action Button "..tostring(frame:GetName()).." does not have __sao, ".."glow may fail")
 elseif not frame.__sao.GetGlowID()then
@@ -431,7 +431,7 @@ local text="[|cffa2f3ff"..AddonName.."|r] One of your addons uses an old version
 print(text)
 warnedOutdatedLBG=true
 end
-local binder=CreateFrame("Frame", "SpellActivationOverlayLABBinder")
+local binder=CreateFrame("Frame", "ProcSpellOverlayLABBinder")
 binder:RegisterEvent("PLAYER_LOGIN")
 binder:SetScript("OnEvent",function()
 if (not LibStub)then

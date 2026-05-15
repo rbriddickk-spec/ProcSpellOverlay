@@ -7,21 +7,21 @@ self:ApplySpellAlertSound()
 self:ApplyGlowingButtonsToggle()
 end
 function SAO.ApplySpellAlertOpacity(self)
-SpellActivationOverlayContainerFrame:SetShown(SpellActivationOverlayDB.alert.enabled)
-SpellActivationOverlayContainerFrame:SetAlpha(SpellActivationOverlayDB.alert.opacity)
+ProcSpellOverlayContainerFrame:SetShown(ProcSpellOverlayDB.alert.enabled)
+ProcSpellOverlayContainerFrame:SetAlpha(ProcSpellOverlayDB.alert.opacity)
 end
 function SAO.ApplySpellAlertGeometry(self)
-SpellActivationOverlayAddonFrame.scale=SpellActivationOverlayDB.alert.scale
-SpellActivationOverlayAddonFrame.offset=SpellActivationOverlayDB.alert.offset
-SpellActivationOverlay_OnChangeGeometry(SpellActivationOverlayAddonFrame)
+ProcSpellOverlayAddonFrame.scale=ProcSpellOverlayDB.alert.scale
+ProcSpellOverlayAddonFrame.offset=ProcSpellOverlayDB.alert.offset
+ProcSpellOverlay_OnChangeGeometry(ProcSpellOverlayAddonFrame)
 end
 function SAO.ApplySpellAlertTimer(self)
-SpellActivationOverlayAddonFrame.useTimer=SpellActivationOverlayDB.alert.timer~=0
-SpellActivationOverlay_OnChangeTimerVisibility(SpellActivationOverlayAddonFrame)
+ProcSpellOverlayAddonFrame.useTimer=ProcSpellOverlayDB.alert.timer~=0
+ProcSpellOverlay_OnChangeTimerVisibility(ProcSpellOverlayAddonFrame)
 end
 function SAO.ApplySpellAlertSound(self)
-SpellActivationOverlayAddonFrame.useSound=SpellActivationOverlayDB.alert.sound~=0
-SpellActivationOverlay_OnChangeSoundToggle(SpellActivationOverlayAddonFrame)
+ProcSpellOverlayAddonFrame.useSound=ProcSpellOverlayDB.alert.sound~=0
+ProcSpellOverlay_OnChangeSoundToggle(ProcSpellOverlayAddonFrame)
 end
 function SAO.ApplyGlowingButtonsToggle(self)
 self:ForEachBucket(function(bucket)

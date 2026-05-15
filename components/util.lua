@@ -29,28 +29,28 @@ function SAO:Info(prefix,msg,...)
 print(WrapTextInColor(ShortAddonName.." -"..prefix.."- "..msg,LIGHTBLUE_FONT_COLOR),...)
 end
 function SAO:HasDebug()
-return SpellActivationOverlayDB and SpellActivationOverlayDB.debug
+return ProcSpellOverlayDB and ProcSpellOverlayDB.debug
 end
 function SAO:Debug(prefix,msg,...)
-if SpellActivationOverlayDB and SpellActivationOverlayDB.debug then
+if ProcSpellOverlayDB and ProcSpellOverlayDB.debug then
 print(WrapTextInColorCode("["..ShortAddonName.."@"..GetTime().."] -"..prefix.."- "..msg, "FFFFFFAA"),...)
 end
 end
 function SAO:HasTrace(prefix)
-return SpellActivationOverlayDB and SpellActivationOverlayDB.trace and SpellActivationOverlayDB.trace[prefix]
+return ProcSpellOverlayDB and ProcSpellOverlayDB.trace and ProcSpellOverlayDB.trace[prefix]
 end
 function SAO.Trace(self,prefix,msg,...)
-if SpellActivationOverlayDB and SpellActivationOverlayDB.trace and SpellActivationOverlayDB.trace[prefix] then
+if ProcSpellOverlayDB and ProcSpellOverlayDB.trace and ProcSpellOverlayDB.trace[prefix] then
 print(WrapTextInColorCode("{"..ShortAddonName.."@"..GetTime().."} -"..prefix.."- "..msg, "FFAAFFCC"),...)
 end
 end
 function SAO:LogPersistent(prefix,msg)
-if SpellActivationOverlayDB then
+if ProcSpellOverlayDB then
 local line="[@"..GetTime().."] :"..prefix..": "..msg
-if not SpellActivationOverlayDB.logs then
-SpellActivationOverlayDB.logs={line}
+if not ProcSpellOverlayDB.logs then
+ProcSpellOverlayDB.logs={line}
 else
-tinsert(SpellActivationOverlayDB.logs,line)
+tinsert(ProcSpellOverlayDB.logs,line)
 end
 end
 end
@@ -66,7 +66,7 @@ function SAO:CanReport()
 return SAO.IsProject(SAO.MOP_AND_ONWARD)
 end
 function SAO:HasReport()
-return SpellActivationOverlayDB and SpellActivationOverlayDB.report~=false
+return ProcSpellOverlayDB and ProcSpellOverlayDB.report~=false
 end
 function SAO:ReportUnknownEffect(prefix,spellID,texture,positions,scale,r,g,b)
 if self:CanReport()
@@ -152,7 +152,7 @@ end
 return result
 end
 function SAO:IsResponsiveMode()
-return SpellActivationOverlayDB and SpellActivationOverlayDB.responsiveMode==true
+return ProcSpellOverlayDB and ProcSpellOverlayDB.responsiveMode==true
 end
 function SAO:IsTimeAlmostEqual(t1,t2,delta)
 return t1-delta < t2 and t2 < t1+delta
