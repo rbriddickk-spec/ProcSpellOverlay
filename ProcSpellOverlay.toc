@@ -1,13 +1,11 @@
-## Interface: 50503
+## Interface: 70300
 ## Title: |TInterface/Icons/Spell_Frost_Stun:16:16:0:0:512:512:64:448:64:448|t ProcSpellOverlay |cff00ff962.7.2|r |TInterface/Icons/achievement_character_pandaren_female:16:16:0:0:512:512:64:448:64:448|t
 ## Notes: Display overlays and glow buttons to improve your gameplay!
 ## Author:
 ## Version: 3.8.2
 ## SavedVariables: ProcSpellOverlayDB
 ## IconTexture: Interface/AddOns/ProcSpellOverlay/textures/icon64
-## X-SAO-Build: mop
-## X-Curse-Project-ID: 649417
-
+## X-SAO-Build: wod
 
 #@no-lib-strip@
 libs\LibStub\LibStub.lua
