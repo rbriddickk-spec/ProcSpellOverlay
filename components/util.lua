@@ -108,4 +108,31 @@ end
 end
 end
 
--- (rest of file unchanged)
+-- Internal registry: _EventHandlerRegistry[frame][eventName] = true
+-- Prevents duplicate frame:RegisterEvent() calls for the same (frame, eventName) pair.
+SAO._EventHandlerRegistry = {}
+
+function SAO:RegisterEventHandler(frame, eventName, fromTag)
+    if not self._EventHandlerRegistry[frame] then
+        self._EventHandlerRegistry[frame] = {}
+    end
+    if not self._EventHandlerRegistry[frame][eventName] then
+        frame:RegisterEvent(eventName)
+        self._EventHandlerRegistry[frame][eventName] = true
+        if self:HasDebug() then
+            self:Debug("events", "RegisterEventHandler("..tostring(eventName)..")"
+                ..(fromTag and " ["..fromTag.."]" or ""))
+        end
+    end
+end
+
+function SAO:UnregisterEventHandler(frame, eventName, fromTag)
+    if self._EventHandlerRegistry[frame] and self._EventHandlerRegistry[frame][eventName] then
+        frame:UnregisterEvent(eventName)
+        self._EventHandlerRegistry[frame][eventName] = nil
+        if self:HasDebug() then
+            self:Debug("events", "UnregisterEventHandler("..tostring(eventName)..")"
+                ..(fromTag and " ["..fromTag.."]" or ""))
+        end
+    end
+end
