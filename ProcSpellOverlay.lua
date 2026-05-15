@@ -8,22 +8,22 @@ local shortSide=128 * sizeScale
 local combatOverlayFactor=2
 local useTimer=true
 local useSound=false
-function SpellActivationOverlay_OnLoad(self)
+function ProcSpellOverlay_OnLoad(self)
 SAO.Frame=self
-SAO.ShowAllOverlays=SpellActivationOverlay_ShowAllOverlays
-SAO.HideOverlays=SpellActivationOverlay_HideOverlays
-SAO.HideAllOverlays=SpellActivationOverlay_HideAllOverlays
-SAO.SetOverlayTimer=SpellActivationOverlay_SetAllOverlayTimers
+SAO.ShowAllOverlays=ProcSpellOverlay_ShowAllOverlays
+SAO.HideOverlays=ProcSpellOverlay_HideOverlays
+SAO.HideAllOverlays=ProcSpellOverlay_HideAllOverlays
+SAO.SetOverlayTimer=ProcSpellOverlay_SetAllOverlayTimers
 self.overlaysInUse={}
 self.unusedOverlays={}
 self.combatOnlyOverlays={}
 self.offset=0
 self.scale=1
-SpellActivationOverlay_OnChangeGeometry(self)
+ProcSpellOverlay_OnChangeGeometry(self)
 self.useTimer=true
-SpellActivationOverlay_OnChangeTimerVisibility(self)
+ProcSpellOverlay_OnChangeTimerVisibility(self)
 self.useSound=false
-SpellActivationOverlay_OnChangeSoundToggle(self)
+ProcSpellOverlay_OnChangeSoundToggle(self)
 local className,classFile,classId=UnitClass("player")
 local class=SAO.Class[classFile]
 if class and not class.IsDisabled then
@@ -72,7 +72,7 @@ end
 end
 SAO:InitializeEventDispatcher()
 end
-function SpellActivationOverlay_OnChangeGeometry(self)
+function ProcSpellOverlay_OnChangeGeometry(self)
 local newSize=256 * sizeScale + self.offset
 self:GetParent():SetSize(newSize,newSize)
 longSide=256 * sizeScale * self.scale
@@ -85,11 +85,11 @@ end
 end
 for _,overlay in ipairs(self.combatOnlyOverlays)do
 if overlay.combat.animOut:IsPlaying()then
-SpellActivationOverlayFrame_PlayCombatAnimOut(overlay.combat.animOut)
+ProcSpellOverlayFrame_PlayCombatAnimOut(overlay.combat.animOut)
 end
 end
 end
-function SpellActivationOverlay_OnChangeTimerVisibility(self)
+function ProcSpellOverlay_OnChangeTimerVisibility(self)
 if useTimer==self.useTimer then
 return
 end
@@ -101,7 +101,7 @@ overlay.mask:SetShown(useTimer)
 end
 end
 end
-function SpellActivationOverlay_OnChangeSoundToggle(self)
+function ProcSpellOverlay_OnChangeSoundToggle(self)
 if useSound==self.useSound then
 return
 end
@@ -123,7 +123,7 @@ end
 end
 end
 end
-function SpellActivationOverlay_OnEvent(self,event,...)
+function ProcSpellOverlay_OnEvent(self,event,...)
 local dispatcher=SAO.CentralizedEventDispatcher[event]
 if dispatcher then
 for _,func in ipairs(dispatcher)do
@@ -195,25 +195,25 @@ BOTTOM={hFlip=true,vFlip=true},
 BOTTOM={hFlip=true},
 },
 }
-function SpellActivationOverlay_ShowAllOverlays(self,spellID,texturePath,positions,scale,r,g,b,autoPulse,forcePulsePlay,endTime,combatOnly,extra)
+function ProcSpellOverlay_ShowAllOverlays(self,spellID,texturePath,positions,scale,r,g,b,autoPulse,forcePulsePlay,endTime,combatOnly,extra)
 if SAO.Shutdown:IsAddonDisabled()then
 return
 end
 positions=strupper(positions)
 if (complexLocationTable[positions])then
 for location,info in pairs(complexLocationTable[positions])do
-SpellActivationOverlay_ShowOverlay(self,spellID,texturePath,location,scale,r,g,b,info.vFlip,info.hFlip,info.cw,autoPulse,forcePulsePlay,endTime,combatOnly,extra)
+ProcSpellOverlay_ShowOverlay(self,spellID,texturePath,location,scale,r,g,b,info.vFlip,info.hFlip,info.cw,autoPulse,forcePulsePlay,endTime,combatOnly,extra)
 end
 else
-SpellActivationOverlay_ShowOverlay(self,spellID,texturePath,positions,scale,r,g,b,false,false,0,autoPulse,forcePulsePlay,endTime,combatOnly,extra)
+ProcSpellOverlay_ShowOverlay(self,spellID,texturePath,positions,scale,r,g,b,false,false,0,autoPulse,forcePulsePlay,endTime,combatOnly,extra)
 end
 end
-function SpellActivationOverlay_ShowOverlay(self,spellID,texturePath,position,scale,r,g,b,vFlip,hFlip,cw,autoPulse,forcePulsePlay,endTime,combatOnly,extra)
+function ProcSpellOverlay_ShowOverlay(self,spellID,texturePath,position,scale,r,g,b,vFlip,hFlip,cw,autoPulse,forcePulsePlay,endTime,combatOnly,extra)
 SAO:Debug(Module, "Starting Overlay at location "..position.." for spell ID "..spellID.." "..SAO:GetSpellName(spellID, "")..(endTime and (" for "..math.floor((type(endTime)=='number' and endTime or endTime.endTime)-GetTime()+0.5).." secs") or ""))
-if (SpellActivationOverlayDB and SpellActivationOverlayDB.alert and not SpellActivationOverlayDB.alert.enabled)then
+if (ProcSpellOverlayDB and ProcSpellOverlayDB.alert and not ProcSpellOverlayDB.alert.enabled)then
 return
 end
-local overlay=SpellActivationOverlay_GetOverlay(self,spellID,position)
+local overlay=ProcSpellOverlay_GetOverlay(self,spellID,position)
 SAO_LastShownOverlay=overlay
 overlay.spellID=spellID
 overlay.position=position
@@ -289,7 +289,7 @@ overlay.pulse:Play()
 end
 overlay.pulse.autoPlay=autoPulse
 overlay.mask:SetShown(useTimer)
-SpellActivationOverlay_SetOverlayTimer(self,overlay,endTime)
+ProcSpellOverlay_SetOverlayTimer(self,overlay,endTime)
 overlay.combatOnly=combatOnly
 if (combatOnly)then
 tDeleteItem(self.combatOnlyOverlays,overlay)
@@ -298,7 +298,7 @@ if (InCombatLockdown())then
 overlay.combat.animOut:Stop()
 elseif (self.disableDimOutOfCombat)then
 overlay.combat.animIn:Stop()
-SpellActivationOverlayFrame_PlayCombatAnimOut(overlay.combat.animOut)
+ProcSpellOverlayFrame_PlayCombatAnimOut(overlay.combat.animOut)
 end
 else
 tDeleteItem(self.combatOnlyOverlays,overlay)
@@ -308,7 +308,7 @@ self.combatAnimOut:Stop()
 self.combatAnimIn:Play()
 if (combatOnly)then
 overlay.combat.animOut:Stop()
-SpellActivationOverlayFrame_PlayCombatAnimIn(overlay.combat.animIn)
+ProcSpellOverlayFrame_PlayCombatAnimIn(overlay.combat.animIn)
 end
 end
 local frameStrata=type(extra)=='table' and extra.strata or "MEDIUM"
@@ -316,13 +316,13 @@ overlay:SetFrameStrata(frameStrata)
 local frameLevel=type(extra)=='table' and extra.level or 3
 overlay:SetFrameLevel(frameLevel)
 end
-function SpellActivationOverlay_DumpCombatOnlyOverlays()
+function ProcSpellOverlay_DumpCombatOnlyOverlays()
 SAO:Info(Module, "Listing combat-only overlays ("..#SAO.Frame.combatOnlyOverlays.." item"..(#SAO.Frame.combatOnlyOverlays==1 and "" or "s")..")")
 for i,overlay in pairs(SAO.Frame.combatOnlyOverlays)do
 SAO:Info(Module, "combat-only-overlay["..i.."] location=="..overlay.position..", ".."spell ID=="..overlay.spellID.." "..SAO:GetSpellName(overlay.spellID, ""))
 end
 end
-function SpellActivationOverlay_GetOverlay(self,spellID,position)
+function ProcSpellOverlay_GetOverlay(self,spellID,position)
 local overlayList=self.overlaysInUse[spellID]
 local overlay
 if (overlayList)then
@@ -333,7 +333,7 @@ end
 end
 end
 if (not overlay)then
-overlay=SpellActivationOverlay_GetUnusedOverlay(self)
+overlay=ProcSpellOverlay_GetUnusedOverlay(self)
 if (overlayList)then
 tinsert(overlayList,overlay)
 else
@@ -342,7 +342,7 @@ end
 end
 return overlay
 end
-function SpellActivationOverlay_HideOverlays(self,spellID)
+function ProcSpellOverlay_HideOverlays(self,spellID)
 local overlayList=self.overlaysInUse[spellID]
 if (overlayList)then
 for i=1,#overlayList do
@@ -353,12 +353,12 @@ overlay.animOut:Play()
 end
 end
 end
-function SpellActivationOverlay_HideAllOverlays(self)
+function ProcSpellOverlay_HideAllOverlays(self)
 for spellID,overlayList in pairs(self.overlaysInUse)do
-SpellActivationOverlay_HideOverlays(self,spellID)
+ProcSpellOverlay_HideOverlays(self,spellID)
 end
 end
-function SpellActivationOverlay_SetAllOverlayTimers(self,spellID,endTime)
+function ProcSpellOverlay_SetAllOverlayTimers(self,spellID,endTime)
 if (not endTime)then
 return
 end
@@ -366,11 +366,11 @@ local overlayList=self.overlaysInUse[spellID]
 if (overlayList)then
 for i=1,#overlayList do
 local overlay=overlayList[i]
-SpellActivationOverlay_SetOverlayTimer(self,overlay,endTime)
+ProcSpellOverlay_SetOverlayTimer(self,overlay,endTime)
 end
 end
 end
-function SpellActivationOverlay_SetOverlayTimer(self,overlay,endTime)
+function ProcSpellOverlay_SetOverlayTimer(self,overlay,endTime)
 local startTime=type(endTime)=='table' and endTime.startTime or nil
 endTime=type(endTime)=='table' and endTime.endTime or endTime
 if (not endTime or endTime <=GetTime())then
@@ -401,20 +401,20 @@ overlay.mask.timeoutY:Stop()
 overlay.mask.timeoutY:Play(false,offset)
 end
 end
-function SpellActivationOverlay_GetUnusedOverlay(self)
+function ProcSpellOverlay_GetUnusedOverlay(self)
 local overlay=tremove(self.unusedOverlays,#self.unusedOverlays)
 if (not overlay)then
-overlay=SpellActivationOverlay_CreateOverlay(self)
+overlay=ProcSpellOverlay_CreateOverlay(self)
 end
 return overlay
 end
-function SpellActivationOverlay_CreateOverlay(self)
-return CreateFrame("Frame",nil,self, "SpellActivationOverlayAddonTemplate")
+function ProcSpellOverlay_CreateOverlay(self)
+return CreateFrame("Frame",nil,self, "ProcSpellOverlayAddonTemplate")
 end
-function SpellActivationOverlayTexture_OnShow(self)
+function ProcSpellOverlayTexture_OnShow(self)
 self.animIn:Play()
 end
-function SpellActivationOverlayTexture_TerminateOverlay(overlay)
+function ProcSpellOverlayTexture_TerminateOverlay(overlay)
 SAO:Debug(Module, "Terminating Overlay at location "..overlay.position.." for spell ID "..overlay.spellID.." "..SAO:GetSpellName(overlay.spellID, ""))
 local overlayParent=overlay:GetParent()
 overlay.pulse:Stop()
@@ -434,13 +434,13 @@ tDeleteItem(overlayParent.overlaysInUse[overlay.spellID],overlay)
 tinsert(overlayParent.unusedOverlays,overlay)
 tDeleteItem(overlayParent.combatOnlyOverlays,overlay)
 end
-function SpellActivationOverlayFrame_OnTimeoutFinished(anim)
+function ProcSpellOverlayFrame_OnTimeoutFinished(anim)
 local mask=anim:GetParent()
 local overlay=mask:GetParent()
 mask:SetScale(0.01)
 overlay.animOut:Play()
 end
-function SpellActivationOverlayFrame_GetCombatAnimOffsetFarAway(anim)
+function ProcSpellOverlayFrame_GetCombatAnimOffsetFarAway(anim)
 local combat=anim:GetParent()
 local overlay=combat:GetParent()
 local frame=overlay:GetParent()
@@ -470,84 +470,84 @@ else
 return
 end
 end
-function SpellActivationOverlayFrame_PlayCombatAnimIn(animIn)
-local offsetX,offsetY=SpellActivationOverlayFrame_GetCombatAnimOffsetFarAway(animIn)
+function ProcSpellOverlayFrame_PlayCombatAnimIn(animIn)
+local offsetX,offsetY=ProcSpellOverlayFrame_GetCombatAnimOffsetFarAway(animIn)
 offsetX,offsetY=0.7 * offsetX,0.7 * offsetY
 animIn.point1:SetOffset(offsetX,offsetY)
 animIn.point2:SetOffset(-offsetX,-offsetY)
 animIn:Play()
 end
-function SpellActivationOverlayFrame_PlayCombatAnimOut(animOut)
-local offsetX,offsetY=SpellActivationOverlayFrame_GetCombatAnimOffsetFarAway(animOut)
+function ProcSpellOverlayFrame_PlayCombatAnimOut(animOut)
+local offsetX,offsetY=ProcSpellOverlayFrame_GetCombatAnimOffsetFarAway(animOut)
 animOut.point1:SetOffset(offsetX,offsetY)
 animOut:Play()
 end
-function SpellActivationOverlayTexture_ShowCombatMask(anim)
+function ProcSpellOverlayTexture_ShowCombatMask(anim)
 local combat=anim:GetParent():GetParent()
-combat:SetTexture("Interface/Addons/SpellActivationOverlay/textures/maskzero")
+combat:SetTexture("Interface/Addons/ProcSpellOverlay/textures/maskzero")
 local overlay=combat:GetParent()
 SAO:Debug(Module, "Showing combat mask for Overlay at location "..overlay.position.." for spell ID "..overlay.spellID.." "..SAO:GetSpellName(overlay.spellID, ""))
 end
-function SpellActivationOverlayTexture_HideCombatMask(anim)
+function ProcSpellOverlayTexture_HideCombatMask(anim)
 local combat=anim:GetParent():GetParent()
 combat:SetTexture("")
 local overlay=combat:GetParent()
 SAO:Debug(Module, "Hiding combat mask for Overlay at location "..overlay.position.." for spell ID "..overlay.spellID.." "..SAO:GetSpellName(overlay.spellID, ""))
 end
-function SpellActivationOverlayTexture_OnCombatAnimInPlay(animIn)
-SpellActivationOverlayTexture_HideCombatMask(animIn)
+function ProcSpellOverlayTexture_OnCombatAnimInPlay(animIn)
+ProcSpellOverlayTexture_HideCombatMask(animIn)
 end
-function SpellActivationOverlayTexture_OnCombatAnimInFinished(animIn)
-SpellActivationOverlayTexture_ShowCombatMask(animIn)
+function ProcSpellOverlayTexture_OnCombatAnimInFinished(animIn)
+ProcSpellOverlayTexture_ShowCombatMask(animIn)
 end
-function SpellActivationOverlayTexture_OnCombatAnimInStop(animIn)
-SpellActivationOverlayTexture_ShowCombatMask(animIn)
+function ProcSpellOverlayTexture_OnCombatAnimInStop(animIn)
+ProcSpellOverlayTexture_ShowCombatMask(animIn)
 end
-function SpellActivationOverlayTexture_OnCombatAnimOutPlay(animOut)
-SpellActivationOverlayTexture_ShowCombatMask(animOut)
+function ProcSpellOverlayTexture_OnCombatAnimOutPlay(animOut)
+ProcSpellOverlayTexture_ShowCombatMask(animOut)
 end
-function SpellActivationOverlayTexture_OnFadeInPlay(animGroup)
+function ProcSpellOverlayTexture_OnFadeInPlay(animGroup)
 local overlay=animGroup:GetParent()
 overlay:SetAlpha(0)
 end
-function SpellActivationOverlayTexture_OnFadeInFinished(animGroup)
+function ProcSpellOverlayTexture_OnFadeInFinished(animGroup)
 local overlay=animGroup:GetParent()
 overlay:SetAlpha(1)
 if (overlay.pulse.autoPlay and not overlay.pulse:IsPlaying())then
 overlay.pulse:Play()
 end
 end
-function SpellActivationOverlayTexture_PreStartPulse(anim)
+function ProcSpellOverlayTexture_PreStartPulse(anim)
 local overlay=anim:GetParent():GetParent()
 if (overlay.combatOnly and overlay.pulse.autoPlay and not overlay.pulse:IsPlaying())then
 overlay.pulse:Play()
 end
 end
-function SpellActivationOverlayTexture_OnFadeOutFinished(anim)
+function ProcSpellOverlayTexture_OnFadeOutFinished(anim)
 local overlay=anim:GetRegionParent()
-SpellActivationOverlayTexture_TerminateOverlay(overlay)
+ProcSpellOverlayTexture_TerminateOverlay(overlay)
 end
-function SpellActivationOverlayFrame_OnFadeInFinished(anim)
+function ProcSpellOverlayFrame_OnFadeInFinished(anim)
 if (not InCombatLockdown())then
 local frame=anim:GetParent()
 if (not frame.disableDimOutOfCombat)then
 frame.combatAnimOut:Play()
 for _,overlay in ipairs(frame.combatOnlyOverlays)do
-SpellActivationOverlayFrame_PlayCombatAnimOut(overlay.combat.animOut)
+ProcSpellOverlayFrame_PlayCombatAnimOut(overlay.combat.animOut)
 end
 end
 end
 end
-function SpellActivationOverlayFrame_OnEnterCombat(anim)
+function ProcSpellOverlayFrame_OnEnterCombat(anim)
 local frame=anim:GetParent()
 frame.inPseudoCombat=true
 end
-function SpellActivationOverlayFrame_OnLeaveCombat(anim)
+function ProcSpellOverlayFrame_OnLeaveCombat(anim)
 local frame=anim:GetParent()
 frame.inPseudoCombat=false
 end
-function SpellActivationOverlayFrame_SetForceAlpha1(enabled)
-local self=SpellActivationOverlayAddonFrame
+function ProcSpellOverlayFrame_SetForceAlpha1(enabled)
+local self=ProcSpellOverlayAddonFrame
 if (enabled)then
 if (not self.disableDimOutOfCombat)then
 self.disableDimOutOfCombat=1
@@ -568,15 +568,15 @@ self.disableDimOutOfCombat=nil
 if (not InCombatLockdown())then
 self.combatAnimOut:Play()
 for _,overlay in ipairs(self.combatOnlyOverlays)do
-SpellActivationOverlayFrame_PlayCombatAnimOut(overlay.combat.animOut)
+ProcSpellOverlayFrame_PlayCombatAnimOut(overlay.combat.animOut)
 end
 end
 end
 end
 end
 end
-function SpellActivationOverlayFrame_SetForceAlpha2(enabled)
-local self=SpellActivationOverlayAddonFrame
+function ProcSpellOverlayFrame_SetForceAlpha2(enabled)
+local self=ProcSpellOverlayAddonFrame
 if (enabled)then
 if (not self.disableDimOutOfCombat)then
 self.disableDimOutOfCombat=10
@@ -597,7 +597,7 @@ self.disableDimOutOfCombat=nil
 if (not InCombatLockdown())then
 self.combatAnimOut:Play()
 for _,overlay in ipairs(self.combatOnlyOverlays)do
-SpellActivationOverlayFrame_PlayCombatAnimOut(overlay.combat.animOut)
+ProcSpellOverlayFrame_PlayCombatAnimOut(overlay.combat.animOut)
 end
 end
 end
