@@ -13,6 +13,7 @@ local heroicStrike=78
 local impendingVictory=103840
 local overpower=7384
 local ragingBlowSoD=402911
+local rampage=184367
 local revenge=6572
 local shieldSlam=23922
 local slam=1464
@@ -301,6 +302,18 @@ overlay={texture="raging_blow",position="Left + Right (Flipped)"},
 }
 )
 end
+local function useRampageActionUsable()
+SAO:CreateEffect(
+"rampage_action_usable",
+SAO.ALL_PROJECTS - SAO.ERA,
+rampage,
+"counter",
+{
+actionUsable=true,
+buttonOption=false,
+}
+)
+end
 local function useSuddenDeath()
 SAO:CreateEffect(
 "sudden_death",
@@ -530,6 +543,7 @@ useExecute()
 useRevenge()
 useVictoryRush()
 useRagingBlow()
+useRampageActionUsable()
 useSuddenDeath()
 useTasteForBlood()
 useBladestorm()
