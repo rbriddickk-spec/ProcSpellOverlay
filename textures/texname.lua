@@ -95,7 +95,7 @@ SAO.TexName={}
 SAO.TextureFilenameFromFullname={}
 for retailTexture,classicTexture in pairs(mapping)do
 local filename=classicTexture:gsub(" ", "_"):gsub("'", "")
-local fullTextureName="Interface\\Addons\\SpellActivationOverlay\\textures\\"..filename
+local fullTextureName="Interface\\Addons\\ProcSpellOverlay\\textures\\"..filename
 local retailNumber=tonumber(retailTexture,10)
 if (
 (SAO.IsCata() and retailNumber <=511469)
@@ -167,29 +167,29 @@ return false
 end
 function SAO_DB_ComputeUnmarkedTextures(output)
 SAO_DB_AddMarkedTextures(false)
-SpellActivationOverlayDB.dev.unmarked={native={},addon={}}
+ProcSpellOverlayDB.dev.unmarked={native={},addon={}}
 for fullTextureName,filename in pairs(SAO.TextureFilenameFromFullname)do
 if availableTextures[filename] then
 if not SAO.MarkedTextures[fullTextureName]
-and (not SpellActivationOverlayDB.dev.marked
-or (not SpellActivationOverlayDB.dev.marked.native[filename]
-and not SpellActivationOverlayDB.dev.marked.addon[filename])
+and (not ProcSpellOverlayDB.dev.marked
+or (not ProcSpellOverlayDB.dev.marked.native[filename]
+and not ProcSpellOverlayDB.dev.marked.addon[filename])
 )
 then
 if type(tonumber(fullTextureName))=='number' then
-SpellActivationOverlayDB.dev.unmarked.native[filename]=tonumber(fullTextureName)
+ProcSpellOverlayDB.dev.unmarked.native[filename]=tonumber(fullTextureName)
 else
-SpellActivationOverlayDB.dev.unmarked.addon[filename]=fullTextureName
+ProcSpellOverlayDB.dev.unmarked.addon[filename]=fullTextureName
 end
 end
 end
 end
 local excludeListSorted={}
-for k,_ in pairs(SpellActivationOverlayDB.dev.unmarked.addon)do
+for k,_ in pairs(ProcSpellOverlayDB.dev.unmarked.addon)do
 tinsert(excludeListSorted,k)
 end
 table.sort(excludeListSorted,compareTextureNames)
-SpellActivationOverlayDB.dev.unmarked.excludeList=excludeListSorted
+ProcSpellOverlayDB.dev.unmarked.excludeList=excludeListSorted
 if type(output)~='boolean' or output then
 print("SAO_DB_ComputeUnmarkedTextures() "..WrapTextInColorCode("OK", "FF00FF00"))
 local excludeListAsString=""
@@ -198,22 +198,22 @@ excludeListAsString=excludeListAsString .. v .. '\n'
 end
 SAO:DumpCopyableText("Files to exclude from package:",excludeListAsString)
 end
-return {unmarked=SpellActivationOverlayDB.dev.unmarked}
+return {unmarked=ProcSpellOverlayDB.dev.unmarked}
 end
 function SAO_DB_LookForTexture(fileDataID,output,saveToDev)
 local f=CreateFrame("Frame",nil)
 local tex=f:CreateTexture()
 tex:SetPoint('CENTER',WorldFrame)
 f:SetAllPoints(tex)
-if saveToDev and SpellActivationOverlayDB.dev then
-SpellActivationOverlayDB.dev.existing[fileDataID]=nil
+if saveToDev and ProcSpellOverlayDB.dev then
+ProcSpellOverlayDB.dev.existing[fileDataID]=nil
 end
 f:SetScript('OnSizeChanged',function(self,width,height)
 local isLoaded=width > 15 and height > 15
-if saveToDev and SpellActivationOverlayDB.dev then
-SpellActivationOverlayDB.dev.existing.id[fileDataID]=isLoaded
-SpellActivationOverlayDB.dev.existing.remaining=SpellActivationOverlayDB.dev.existing.remaining-1
-if SpellActivationOverlayDB.dev.existing.remaining==0 and (type(output)~='boolean' or output)then
+if saveToDev and ProcSpellOverlayDB.dev then
+ProcSpellOverlayDB.dev.existing.id[fileDataID]=isLoaded
+ProcSpellOverlayDB.dev.existing.remaining=ProcSpellOverlayDB.dev.existing.remaining-1
+if ProcSpellOverlayDB.dev.existing.remaining==0 and (type(output)~='boolean' or output)then
 print("SAO_DB_DetectExistingMarkedTextures() "..WrapTextInColorCode("Complete", "FF00FF00"))
 end
 end
@@ -231,12 +231,12 @@ tex:SetSize(0,0)
 end
 function SAO_DB_LookForAllTextures(output)
 SAO_DB_AddMarkedTextures(false)
-SpellActivationOverlayDB.dev.existing={remaining=0,id={}}
+ProcSpellOverlayDB.dev.existing={remaining=0,id={}}
 local fileDataIDs={}
 for retailTexture in pairs(mapping)do
 table.insert(fileDataIDs,tonumber(retailTexture,10))
 end
-SpellActivationOverlayDB.dev.existing.remaining=#fileDataIDs
+ProcSpellOverlayDB.dev.existing.remaining=#fileDataIDs
 for _,fileDataID in ipairs(fileDataIDs)do
 SAO_DB_LookForTexture(fileDataID,output,true)
 end
