@@ -41,12 +41,17 @@ if hasMidnightUI~=nil then
 return hasMidnightUI
 end
 local buildInfo=tonumber((select(2,GetBuildInfo())))
-hasMidnightUI=(SAO.IsTBC() and buildInfo >=65295)
-or (SAO.IsRetail() and LE_EXPANSION_LEVEL_CURRENT >=LE_EXPANSION_MIDNIGHT)
+-- LE_EXPANSION_LEVEL_CURRENT / LE_EXPANSION_MIDNIGHT may not exist on older clients (e.g., Legion).
+local currentExp=_G.LE_EXPANSION_LEVEL_CURRENT
+local midnightExp=_G.LE_EXPANSION_MIDNIGHT
+hasMidnightUI=(SAO.IsTBC() and buildInfo and buildInfo >=65295)
+or (SAO.IsRetail() and type(currentExp)=="number" and type(midnightExp)=="number" and currentExp >= midnightExp)
 return hasMidnightUI
 end
 function SAO.HasMidnightEvents()
-return SAO.IsRetail() and LE_EXPANSION_LEVEL_CURRENT >=LE_EXPANSION_MIDNIGHT
+local currentExp=_G.LE_EXPANSION_LEVEL_CURRENT
+local midnightExp=_G.LE_EXPANSION_MIDNIGHT
+return SAO.IsRetail() and type(currentExp)=="number" and type(midnightExp)=="number" and currentExp >= midnightExp
 end
 function SAO.IsProject(projectFlags)
 if type(projectFlags)~='number' then
@@ -97,7 +102,7 @@ tbc=EXPANSION_NAME1 or "The Burning Crusade",
 wrath=EXPANSION_NAME2 or "Wrath of the Lich King",
 cata=EXPANSION_NAME3 or "Cataclysm",
 mop=EXPANSION_NAME4 or "Mists of Pandaria",
-retail=_G["EXPANSION_NAME"..(LE_EXPANSION_LEVEL_CURRENT or 99)] or "Retail",
+retail=_G["EXPANSION_NAME"..(_G.LE_EXPANSION_LEVEL_CURRENT or 99)] or "Retail",
 }
 function SAO.GetFullProjectName(buildID)
 return projectNameForBuildID[select(1,splitBuildID(buildID))] or "Unknown"
