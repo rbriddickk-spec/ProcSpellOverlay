@@ -16,6 +16,7 @@ libs\LibButtonGlow-1.0\LibButtonGlow-1.0.lua
 
 components\project.lua
 components\util.lua
+components\procicons.lua
 
 components\aura.lua
 components\bucket.lua
