@@ -32,7 +32,13 @@ local function WrapTextInColorCompat(text,color)
   end
   return text
 end
-
+function SAO:IsTimeAlmostEqual(t1, t2, epsilon)
+  if type(t1) ~= "number" or type(t2) ~= "number" then
+    return false
+  end
+  epsilon = (type(epsilon) == "number") and epsilon or 0.05
+  return math.abs(t1 - t2) <= epsilon
+end
 function SAO:Error(prefix,msg,...)
 print(WrapTextInColorCompat("**"..ShortAddonName.."** -"..prefix.."- "..msg,RED_FONT_COLOR),...)
 end
