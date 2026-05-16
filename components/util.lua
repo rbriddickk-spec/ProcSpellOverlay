@@ -186,6 +186,14 @@ function SAO:GetGCD()
     return 1.5
 end
 
+function SAO:IsTimeAlmostEqual(t1,t2,epsilon)
+    if type(t1)~='number' or type(t2)~='number' then
+        return false
+    end
+    epsilon=math.abs(tonumber(epsilon) or 0)
+    return math.abs(t1-t2) <= epsilon
+end
+
 -- Returns the stack count (and auraInstanceID if available) of a player aura by spellID.
 -- Uses the modern C_UnitAuras API when available (Dragonflight+), otherwise falls back
 -- to classic UnitAura scanning compatible with Legion/WoD clients.
