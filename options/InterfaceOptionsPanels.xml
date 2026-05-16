@@ -146,7 +146,9 @@
             end
           </OnClick>
           <OnHide>
-            self:StopTest();
+            if (self.StopTest) then
+              self:StopTest();
+            end
           </OnHide>
         </Scripts>
       </Button>

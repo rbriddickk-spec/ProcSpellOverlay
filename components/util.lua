@@ -215,3 +215,18 @@ function SAO:GetPlayerAuraStacksBySpellID(spellID)
     end
     return nil, nil
 end
+
+-- Returns true if responsive mode is enabled (more frequent polling).
+-- Safe default is false; reads ProcSpellOverlayDB.responsiveMode when available.
+function SAO:IsResponsiveMode()
+    return ProcSpellOverlayDB and ProcSpellOverlayDB.responsiveMode == true
+end
+
+-- Returns a human-readable name string for a talent/spell ID, used by the options UI.
+-- Minimal Legion/WoD-safe implementation: returns the spell name or empty string.
+function SAO:GetTalentText(talentID)
+    if not talentID then return nil end
+    local name = GetSpellInfo and GetSpellInfo(talentID) or nil
+    if not name then return nil end
+    return name
+end
