@@ -1,6 +1,32 @@
 local AddonName,SAO=...
 local iamNecrosis=strlower(AddonName):sub(0,8)=="necrosis"
 local GetAddOnMetadata=C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
+local function SetSliderText(slider, text)
+  if not slider then return end
+  text = tostring(text or "")
+
+  if slider.Text and slider.Text.SetText then
+    slider.Text:SetText(text)
+    return
+  end
+  if slider.text and slider.text.SetText then
+    slider.text:SetText(text)
+    return
+  end
+
+  -- Older templates: <SliderName>Text is a global FontString
+  local name = slider.GetName and slider:GetName()
+  local fs = name and _G[name .. "Text"]
+  if fs and fs.SetText then
+    fs:SetText(text)
+    return
+  end
+
+  -- Last resort: if the slider itself is a FontString-like object
+  if slider.SetText then
+    slider:SetText(text)
+  end
+end
 function ProcSpellOverlayOptionsPanel_Init(self)
 local shutdownCategory=SAO.Shutdown:GetCategory()
 if shutdownCategory then
@@ -95,7 +121,8 @@ else
 optimizedForText=SAO:optimizedFor(WrapTextInColorCode(BNET_FRIEND_TOOLTIP_WOW_CLASSIC, "ffff0000"))
 end
 else
-optimizedForText=SAO:optimizedFor(string.format(BNET_FRIEND_ZONE_WOW_CLASSIC,addonBuild))
+local fmt = BNET_FRIEND_ZONE_WOW_CLASSIC or "%s"
+optimizedForText = SAO:optimizedFor(string.format(fmt, addonBuild))
 end
 local subProjectName=SAO.GetSubProjectName(xSaoBuild)
 if subProjectName then
@@ -151,7 +178,7 @@ else
 classInfoLabel:SetText("")
 end
 local opacitySlider=ProcSpellOverlayOptionsPanelSpellAlertOpacitySlider
-opacitySlider.Text:SetText(SPELL_ALERT_OPACITY)
+SetSliderText(opacitySlider, SPELL_ALERT_OPACITY)
 _G[opacitySlider:GetName().."Low"]:SetText(OFF)
 opacitySlider:SetMinMaxValues(0,1)
 opacitySlider:SetValueStep(0.05)
@@ -163,7 +190,7 @@ ProcSpellOverlayDB.alert.enabled=value > 0
 SAO:ApplySpellAlertOpacity()
 end
 local scaleSlider=ProcSpellOverlayOptionsPanelSpellAlertScaleSlider
-scaleSlider.Text:SetText("Spell Alert Scale")
+SetSliderText(scaleSlider, "Spell Alert Scale")
 _G[scaleSlider:GetName().."Low"]:SetText(SMALL)
 _G[scaleSlider:GetName().."High"]:SetText(LARGE)
 scaleSlider:SetMinMaxValues(0.25,2.5)
@@ -175,7 +202,7 @@ ProcSpellOverlayDB.alert.scale=value
 SAO:ApplySpellAlertGeometry()
 end
 local offsetSlider=ProcSpellOverlayOptionsPanelSpellAlertOffsetSlider
-offsetSlider.Text:SetText("Spell Alert Offset")
+SetSliderText(offsetSlider, "Spell Alert Offset")
 _G[offsetSlider:GetName().."Low"]:SetText(NEAR)
 _G[offsetSlider:GetName().."High"]:SetText(FAR)
 offsetSlider:SetMinMaxValues(-200,400)
@@ -187,7 +214,7 @@ ProcSpellOverlayDB.alert.offset=value
 SAO:ApplySpellAlertGeometry()
 end
 local timerSlider=ProcSpellOverlayOptionsPanelSpellAlertTimerSlider
-timerSlider.Text:SetText("Spell Alert Progressive Timer")
+SetSliderText(timerSlider, "Spell Alert Progressive Timer")
 _G[timerSlider:GetName().."Low"]:SetText(DISABLE)
 _G[timerSlider:GetName().."High"]:SetText(ENABLE)
 timerSlider:SetMinMaxValues(0,1)
@@ -199,7 +226,7 @@ ProcSpellOverlayDB.alert.timer=value
 SAO:ApplySpellAlertTimer()
 end
 local soundSlider=ProcSpellOverlayOptionsPanelSpellAlertSoundSlider
-soundSlider.Text:SetText("Spell Alert Sound Effect")
+SetSliderText(soundSlider, "Spell Alert Sound Effect")
 _G[soundSlider:GetName().."Low"]:SetText(DISABLE)
 _G[soundSlider:GetName().."High"]:SetText(ENABLE)
 soundSlider:SetMinMaxValues(0,1)

@@ -139,7 +139,9 @@ function SAO:UnregisterEventHandler(frame, eventName, fromTag)
 end
 
 -- Legion/WoD compatibility helpers --
-
+function SAO:gradientText(text, ...)
+  return tostring(text or "")
+end
 -- Returns a hash name string for the given aura stack count.
 -- Used by class files to build setupHash/testHash overlay options.
 -- Defers actual hash building to runtime so aurastacks variable is already registered.
