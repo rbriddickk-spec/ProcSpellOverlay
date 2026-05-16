@@ -1,83 +1,9 @@
-Message: ...erface\AddOns\ProcSpellOverlay\options\questions.lua:21: attempt to index global 'C_CVar' (a nil value)
-Time: 05/16/26 14:03:07
+Message: ...\ProcSpellOverlay\options\InterfaceOptionsPanels.lua:98: bad argument #1 to 'format' (string expected, got nil)
+Time: 05/16/26 14:39:14
 Count: 1
-Stack: ...erface\AddOns\ProcSpellOverlay\options\questions.lua:21: attempt to index global 'C_CVar' (a nil value)
+Stack: ...\ProcSpellOverlay\options\InterfaceOptionsPanels.lua:98: bad argument #1 to 'format' (string expected, got nil)
 [C]: ?
-...erface\AddOns\ProcSpellOverlay\options\questions.lua:21: in function `isPossible'
-...erface\AddOns\ProcSpellOverlay\options\questions.lua:121: in function `AskQuestionsAtStart'
-Interface\AddOns\ProcSpellOverlay\options\db.lua:200: in function <Interface\AddOns\ProcSpellOverlay\options\db.lua:197>
+[C]: in function `format'
+...\ProcSpellOverlay\options\InterfaceOptionsPanels.lua:98: in function `ProcSpellOverlayOptionsPanel_Init'
+Interface\AddOns\ProcSpellOverlay\options\db.lua:204: in function <Interface\AddOns\ProcSpellOverlay\options\db.lua:197>
 
-Message: ...nterface\AddOns\ProcSpellOverlay\components\glow.lua:45: attempt to call method 'IsResponsiveMode' (a nil value)
-Time: 05/16/26 14:03:08
-Count: 1
-Stack: ...nterface\AddOns\ProcSpellOverlay\components\glow.lua:45: attempt to call method 'IsResponsiveMode' (a nil value)
-[C]: in function `IsResponsiveMode'
-...nterface\AddOns\ProcSpellOverlay\components\glow.lua:45: in function `BeginGlowFinally'
-...nterface\AddOns\ProcSpellOverlay\components\glow.lua:92: in function `BeginSAOGlow'
-...nterface\AddOns\ProcSpellOverlay\components\glow.lua:172: in function <...nterface\AddOns\ProcSpellOverlay\components\glow.lua:166>
-...nterface\AddOns\ProcSpellOverlay\components\glow.lua:332: in function `AddGlowNumber'
-...nterface\AddOns\ProcSpellOverlay\components\glow.lua:377: in function `AddGlow'
-...rface\AddOns\ProcSpellOverlay\components\display.lua:113: in function `showButtons'
-...rface\AddOns\ProcSpellOverlay\components\display.lua:155: in function `setStatus'
-...rface\AddOns\ProcSpellOverlay\components\display.lua:129: in function `show'
-...erface\AddOns\ProcSpellOverlay\components\bucket.lua:125: in function `applyHash'
-...face\AddOns\ProcSpellOverlay\components\variable.lua:56: in function `setActionUsable'
-...e\AddOns\ProcSpellOverlay\variables\actionusable.lua:94: in function `?'
-...rface\AddOns\ProcSpellOverlay\components\trigger.lua:104: in function `manualCheckAll'
-...erface\AddOns\ProcSpellOverlay\components\bucket.lua:287: in function `bucketFunc'
-...erface\AddOns\ProcSpellOverlay\components\bucket.lua:274: in function `ForEachBucket'
-...erface\AddOns\ProcSpellOverlay\components\bucket.lua:285: in function `CheckManuallyAllBuckets'
-...erface\AddOns\ProcSpellOverlay\components\events.lua:11: in function <...erface\AddOns\ProcSpellOverlay\components\events.lua:6>
-...erface\AddOns\ProcSpellOverlay\components\events.lua:127: in function `func'
-...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:130: in function <...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:126>
-
-Message: ...nterface\AddOns\ProcSpellOverlay\classes\warrior.lua:239: attempt to call method 'IsResponsiveMode' (a nil value)
-Time: 05/16/26 14:05:24
-Count: 64
-Stack: ...nterface\AddOns\ProcSpellOverlay\classes\warrior.lua:239: attempt to call method 'IsResponsiveMode' (a nil value)
-[C]: in function `IsResponsiveMode'
-...nterface\AddOns\ProcSpellOverlay\classes\warrior.lua:239: in function <...nterface\AddOns\ProcSpellOverlay\classes\warrior.lua:238>
-...erface\AddOns\ProcSpellOverlay\components\events.lua:146: in function `func'
-...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:130: in function <...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:126>
-
-Message: ...erface\AddOns\ProcSpellOverlay\variables\execute.lua:120: attempt to call method 'IsResponsiveMode' (a nil value)
-Time: 05/16/26 14:05:22
-Count: 42
-Stack: ...erface\AddOns\ProcSpellOverlay\variables\execute.lua:120: attempt to call method 'IsResponsiveMode' (a nil value)
-[C]: in function `IsResponsiveMode'
-...erface\AddOns\ProcSpellOverlay\variables\execute.lua:120: in function <...erface\AddOns\ProcSpellOverlay\variables\execute.lua:119>
-...erface\AddOns\ProcSpellOverlay\components\events.lua:137: in function `func'
-...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:130: in function <...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:126>
-
-Message: ...nterface\AddOns\ProcSpellOverlay\components\glow.lua:45: attempt to call method 'IsResponsiveMode' (a nil value)
-Time: 05/16/26 14:05:22
-Count: 2
-Stack: ...nterface\AddOns\ProcSpellOverlay\components\glow.lua:45: attempt to call method 'IsResponsiveMode' (a nil value)
-[C]: in function `IsResponsiveMode'
-...nterface\AddOns\ProcSpellOverlay\components\glow.lua:45: in function `BeginGlowFinally'
-...nterface\AddOns\ProcSpellOverlay\components\glow.lua:139: in function `EndNativeGlow'
-...nterface\AddOns\ProcSpellOverlay\components\glow.lua:162: in function <...nterface\AddOns\ProcSpellOverlay\components\glow.lua:158>
-
-Message: ...face\AddOns\ProcSpellOverlay\options\glowoptions.lua:4: attempt to call method 'GetTalentText' (a nil value)
-Time: 05/16/26 14:04:42
-Count: 1
-Stack: ...face\AddOns\ProcSpellOverlay\options\glowoptions.lua:4: attempt to call method 'GetTalentText' (a nil value)
-[C]: in function `GetTalentText'
-...face\AddOns\ProcSpellOverlay\options\glowoptions.lua:4: in function `AddGlowingOption'
-...erface\AddOns\ProcSpellOverlay\components\effect.lua:472: in function `AddEffectOptions'
-...\ProcSpellOverlay\options\InterfaceOptionsPanels.lua:444: in function <...\ProcSpellOverlay\options\InterfaceOptionsPanels.lua:435>
-[C]: in function `Show'
-Interface\FrameXML\InterfaceOptionsFrame.lua:28: in function `InterfaceOptionsList_DisplayPanel'
-Interface\FrameXML\InterfaceOptionsFrame.lua:46: in function `InterfaceOptionsListButton_OnClick'
-[string "*:OnClick"]:2: in function <[string "*:OnClick"]:1>
-
-Message: [string "ProcSpellOverlayOptionsPanelSpellAlertTestButton:OnHide"]:1: attempt to call method 'StopTest' (a nil value)
-Time: 05/16/26 14:04:43
-Count: 1
-Stack: [string "ProcSpellOverlayOptionsPanelSpellAlertTestButton:OnHide"]:1: attempt to call method 'StopTest' (a nil value)
-[C]: in function `StopTest'
-[string "*:OnHide"]:1: in function <[string "*:OnHide"]:1>
-[C]: in function `Hide'
-Interface\FrameXML\InterfaceOptionsFrame.lua:202: in function `InterfaceOptionsFrame_Show'
-Interface\FrameXML\InterfaceOptionsFrame.lua:244: in function <Interface\FrameXML\InterfaceOptionsFrame.lua:224>
-[C]: ?
