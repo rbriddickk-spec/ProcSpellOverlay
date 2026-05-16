@@ -11,6 +11,7 @@ local GetSpellTabInfo=GetSpellTabInfo
 local GetTalentInfo=GetTalentInfo
 local GetTalentTabInfo=GetTalentTabInfo
 local GetTime=GetTime
+local GetSpellInfo=GetSpellInfo
 local UnitAura=UnitAura
 local UnitClassBase=UnitClassBase
 local GetAuraDataBySpellName=C_UnitAuras and C_UnitAuras.GetAuraDataBySpellName
@@ -135,4 +136,82 @@ function SAO:UnregisterEventHandler(frame, eventName, fromTag)
                 ..(fromTag and " ["..fromTag.."]" or ""))
         end
     end
+end
+
+-- Legion/WoD compatibility helpers --
+
+-- Returns a hash name string for the given aura stack count.
+-- Used by class files to build setupHash/testHash overlay options.
+-- Defers actual hash building to runtime so aurastacks variable is already registered.
+function SAO:HashNameFromStacks(stacks)
+    if stacks == nil then return nil end
+    stacks = tonumber(stacks)
+    if stacks == nil then return nil end
+    local h = SAO.Hash:new()
+    h:setAuraStacks(stacks)
+    return h:toString()
+end
+
+-- Returns a hash name string from a raw numeric hash value.
+-- Used internally by effect.lua when building overlay options.
+function SAO:HashNameFromHashNumber(hashNumber)
+    if type(hashNumber) ~= 'number' then return nil end
+    return SAO.Hash:new(hashNumber):toString()
+end
+
+-- Maps an action bar slot to its associated spellID.
+-- Handles direct spell slots and macro slots (via GetMacroSpell).
+-- Compatible with Legion/WoD clients where GetActionInfo exists.
+function SAO:GetSpellIDByActionSlot(slot)
+    if type(slot) ~= 'number' then return nil end
+    local actionType, id = GetActionInfo(slot)
+    if actionType == 'spell' then
+        return id
+    elseif actionType == 'macro' then
+        local macroSpellID = GetMacroSpell(id)
+        if macroSpellID then return macroSpellID end
+    end
+    return nil
+end
+
+-- Returns the current global cooldown duration in seconds.
+-- Uses spell 61304 (GCD placeholder) when available, otherwise falls back to 1.5s.
+function SAO:GetGCD()
+    local start, duration = SAO:GetSpellCooldown(61304)
+    if type(duration) == 'number' and duration > 0 then
+        return duration
+    end
+    return 1.5
+end
+
+-- Returns the stack count (and auraInstanceID if available) of a player aura by spellID.
+-- Uses the modern C_UnitAuras API when available (Dragonflight+), otherwise falls back
+-- to classic UnitAura scanning compatible with Legion/WoD clients.
+function SAO:GetPlayerAuraStacksBySpellID(spellID)
+    if not spellID then return nil, nil end
+    -- Modern API (Dragonflight+)
+    if GetPlayerAuraBySpellID then
+        local aura = GetPlayerAuraBySpellID(spellID)
+        if aura then
+            return aura.applications or 0, aura.auraInstanceID
+        end
+        return nil, nil
+    end
+    -- Legacy UnitAura scanning (WoD/Legion era)
+    local spellName = GetSpellInfo and GetSpellInfo(spellID) or nil
+    for i = 1, 40 do
+        local name, _, _, count, _, _, _, _, _, _, auraSpellID = UnitAura("player", i, "HELPFUL")
+        if not name then break end
+        if auraSpellID == spellID or (spellName and name == spellName) then
+            return (count or 0), nil
+        end
+    end
+    for i = 1, 40 do
+        local name, _, _, count, _, _, _, _, _, _, auraSpellID = UnitAura("player", i, "HARMFUL")
+        if not name then break end
+        if auraSpellID == spellID or (spellName and name == spellName) then
+            return (count or 0), nil
+        end
+    end
+    return nil, nil
 end

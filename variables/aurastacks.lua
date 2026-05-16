@@ -143,7 +143,7 @@ UNIT_AURA=SAO.AURASTACKS.MODERN and function(unitTarget,updateInfo)
 if not UnitIsUnit(unitTarget, "player")then
 return
 end
-if updateInfo.isFullUpdate then
+if not updateInfo or updateInfo.isFullUpdate then
 SAO:Debug(Module, "Full aura update detected,rechecking all buckets")
 SAO:CheckManuallyAllBuckets(SAO.TRIGGER_AURA)
 return
