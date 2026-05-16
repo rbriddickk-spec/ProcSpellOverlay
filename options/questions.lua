@@ -17,10 +17,16 @@ displayGameSaoVar="displayProcSpellOverlays",
 staticPopupDialog="SAO_DISABLE_GAME_ALERT",
 },
 isPossible=function(self)
+if not C_CVar or not C_CVar.GetCVarInfo or not C_CVar.GetCVarBool then
+return false
+end
 return SAO.IsProject(SAO.MOP_AND_ONWARD)
 and C_CVar.GetCVarInfo(self.props.displayGameSaoVar)~=nil
 end,
 isRelevantNow=function(self)
+if not C_CVar or not C_CVar.GetCVarBool then
+return false
+end
 return C_CVar.GetCVarBool(self.props.displayGameSaoVar)
 and ProcSpellOverlayDB.alert.enabled
 end,
