@@ -121,7 +121,7 @@ else
 optimizedForText=SAO:optimizedFor(WrapTextInColorCode(BNET_FRIEND_TOOLTIP_WOW_CLASSIC, "ffff0000"))
 end
 else
-local fmt = BNET_FRIEND_ZONE_WOW_CLASSIC or "%s"
+local fmt = type(BNET_FRIEND_ZONE_WOW_CLASSIC)=="string" and BNET_FRIEND_ZONE_WOW_CLASSIC or "%s"
 optimizedForText = SAO:optimizedFor(string.format(fmt, addonBuild))
 end
 local subProjectName=SAO.GetSubProjectName(xSaoBuild)

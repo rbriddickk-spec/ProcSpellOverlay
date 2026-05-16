@@ -427,7 +427,9 @@ overlay.combat.animOut:Stop()
 SAO:StopSpellAlertSound(overlay.soundHandle,1000)
 overlay.soundHandle=nil
 overlay.mask:SetAlpha(0)
+if overlay.mask and overlay.mask.SetScale then
 overlay.mask:SetScale(1)
+end
 overlay.endTime=nil
 overlay:Hide()
 tDeleteItem(overlayParent.overlaysInUse[overlay.spellID],overlay)
@@ -437,7 +439,9 @@ end
 function ProcSpellOverlayFrame_OnTimeoutFinished(anim)
 local mask=anim:GetParent()
 local overlay=mask:GetParent()
+if mask and mask.SetScale then
 mask:SetScale(0.01)
+end
 overlay.animOut:Play()
 end
 function ProcSpellOverlayFrame_GetCombatAnimOffsetFarAway(anim)

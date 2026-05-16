@@ -4,6 +4,7 @@ local GetSpellCooldownModern=C_Spell and C_Spell.GetSpellCooldown
 local GetSpellInfoLegacy=GetSpellInfo
 local GetSpellInfoModern=C_Spell and C_Spell.GetSpellInfo
 local GetSpellPowerCost=C_Spell and C_Spell.GetSpellPowerCost or GetSpellPowerCost
+local UnitAura=UnitAura
 local IsSpellKnownOrOverridesKnown=IsSpellKnownOrOverridesKnown
 if C_SpellBook and C_SpellBook.IsSpellInBook then
 IsSpellKnownOrOverridesKnown=function(spellID)
@@ -11,6 +12,29 @@ return C_SpellBook.IsSpellInBook(spellID,false,true)
 end
 end
 SAO.SpellIDsByName={}
+function SAO:GetHomonymSpellIDs(name)
+return {}
+end
+function SAO:GetPlayerAuraDurationExpirationTimeBySpellIdOrName(spellIdOrName)
+local spellID=type(spellIdOrName)=='number' and spellIdOrName or nil
+local spellName=type(spellIdOrName)=='string' and spellIdOrName or self:GetSpellName(spellIdOrName)
+if not spellID and not spellName then
+return nil,nil
+end
+for _,auraType in ipairs({"HELPFUL","HARMFUL"})do
+for i=1,40 do
+local name,_,_,_,_,duration,expirationTime,_,_,_,auraSpellID=UnitAura("player",i,auraType)
+if not name then
+break
+end
+if auraSpellID==spellID or (spellName and name==spellName) then
+return duration,expirationTime
+end
+end
+end
+return nil,nil
+end
+SAO.GetPlayerAuraDurationExpirationTimBySpellIdOrName=SAO.GetPlayerAuraDurationExpirationTimeBySpellIdOrName
 function SAO:DoesSpellExist(spellID)
 if GetSpellInfoModern then
 local spellInfo=GetSpellInfoModern(spellID)
