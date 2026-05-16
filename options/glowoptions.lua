@@ -70,3 +70,15 @@ end
 function SAO.GetGlowingOptions(self,spellID)
 return self:GetOptions("glow",spellID)
 end
+function SAO:GetTalentText(talentOrSpellID)
+  if not talentOrSpellID then
+    return ""
+  end
+
+  if type(talentOrSpellID) == "number" then
+    local name = GetSpellInfo(talentOrSpellID)
+    return name or ""
+  end
+
+  return tostring(talentOrSpellID)
+end

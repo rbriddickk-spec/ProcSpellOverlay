@@ -224,9 +224,15 @@ end
 
 -- Returns a human-readable name string for a talent/spell ID, used by the options UI.
 -- Minimal Legion/WoD-safe implementation: returns the spell name or empty string.
-function SAO:GetTalentText(talentID)
-    if not talentID then return nil end
-    local name = GetSpellInfo and GetSpellInfo(talentID) or nil
-    if not name then return nil end
-    return name
+function SAO:GetTalentText(talentOrSpellID)
+  if not talentOrSpellID then
+    return ""
+  end
+
+  if type(talentOrSpellID) == "number" then
+    local name = GetSpellInfo(talentOrSpellID)
+    return name or ""
+  end
+
+  return tostring(talentOrSpellID)
 end
