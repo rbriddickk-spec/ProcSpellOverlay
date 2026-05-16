@@ -1,9 +1,58 @@
-Message: ...\ProcSpellOverlay\options\InterfaceOptionsPanels.lua:98: bad argument #1 to 'format' (string expected, got nil)
-Time: 05/16/26 14:39:14
+Message: ...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:380: attempt to call method 'IsTimeAlmostEqual' (a nil value)
+Time: 05/16/26 15:00:19
 Count: 1
-Stack: ...\ProcSpellOverlay\options\InterfaceOptionsPanels.lua:98: bad argument #1 to 'format' (string expected, got nil)
-[C]: ?
-[C]: in function `format'
-...\ProcSpellOverlay\options\InterfaceOptionsPanels.lua:98: in function `ProcSpellOverlayOptionsPanel_Init'
-Interface\AddOns\ProcSpellOverlay\options\db.lua:204: in function <Interface\AddOns\ProcSpellOverlay\options\db.lua:197>
+Stack: ...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:380: attempt to call method 'IsTimeAlmostEqual' (a nil value)
+[C]: in function `IsTimeAlmostEqual'
+...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:380: in function `ProcSpellOverlay_SetOverlayTimer'
+...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:369: in function `SetOverlayTimer'
+...rface\AddOns\ProcSpellOverlay\components\overlay.lua:59: in function `RefreshOverlayTimer'
+...\ProcSpellOverlay\options\InterfaceOptionsPanels.lua:254: in function <...\ProcSpellOverlay\options\InterfaceOptionsPanels.lua:253>
+Interface\SharedXML\C_TimerAugment.lua:16: in function <Interface\SharedXML\C_TimerAugment.lua:14>
 
+Message: ...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:440: attempt to call method 'SetScale' (a nil value)
+Time: 05/16/26 15:00:19
+Count: 3
+Stack: ...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:440: attempt to call method 'SetScale' (a nil value)
+[C]: in function `SetScale'
+...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:440: in function <...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:437>
+
+Message: ...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:430: attempt to call method 'SetScale' (a nil value)
+Time: 05/16/26 15:00:42
+Count: 15
+Stack: ...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:430: attempt to call method 'SetScale' (a nil value)
+[C]: in function `SetScale'
+...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:430: in function `ProcSpellOverlayTexture_TerminateOverlay'
+...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:528: in function <...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:526>
+
+Message: ...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:380: attempt to call method 'IsTimeAlmostEqual' (a nil value)
+Time: 05/16/26 15:00:42
+Count: 5
+Stack: ...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:380: attempt to call method 'IsTimeAlmostEqual' (a nil value)
+[C]: in function `IsTimeAlmostEqual'
+...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:380: in function `ProcSpellOverlay_SetOverlayTimer'
+...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:292: in function `ProcSpellOverlay_ShowOverlay'
+...terface\AddOns\ProcSpellOverlay\ProcSpellOverlay.lua:205: in function `ShowAllOverlays'
+...rface\AddOns\ProcSpellOverlay\components\overlay.lua:50: in function `ActivateOverlay'
+...\ProcSpellOverlay\options\InterfaceOptionsPanels.lua:250: in function `StartTest'
+[string "*:OnClick"]:2: in function <[string "*:OnClick"]:1>
+
+Message: ...terface\AddOns\ProcSpellOverlay\components\spell.lua:129: attempt to call method 'GetPlayerAuraDurationExpirationTimBySpellIdOrName' (a nil value)
+Time: 05/16/26 15:00:47
+Count: 10
+Stack: ...terface\AddOns\ProcSpellOverlay\components\spell.lua:129: attempt to call method 'GetPlayerAuraDurationExpirationTimBySpellIdOrName' (a nil value)
+[C]: in function `GetPlayerAuraDurationExpirationTimBySpellIdOrName'
+...terface\AddOns\ProcSpellOverlay\components\spell.lua:129: in function `GetSpellEndTime'
+...rface\AddOns\ProcSpellOverlay\components\overlay.lua:49: in function `ActivateOverlay'
+...e\AddOns\ProcSpellOverlay\options\overlayoptions.lua:83: in function <...e\AddOns\ProcSpellOverlay\options\overlayoptions.lua:51>
+...ace\AddOns\ProcSpellOverlay\options\classoptions.lua:135: in function <...ace\AddOns\ProcSpellOverlay\options\classoptions.lua:135>
+
+Message: ...terface\AddOns\ProcSpellOverlay\components\spell.lua:68: attempt to call method 'GetHomonymSpellIDs' (a nil value)
+Time: 05/16/26 15:02:06
+Count: 4
+Stack: ...terface\AddOns\ProcSpellOverlay\components\spell.lua:68: attempt to call method 'GetHomonymSpellIDs' (a nil value)
+[C]: in function `GetHomonymSpellIDs'
+...terface\AddOns\ProcSpellOverlay\components\spell.lua:68: in function `RefreshSpellIDsByName'
+...terface\AddOns\ProcSpellOverlay\components\spell.lua:64: in function `GetSpellIDsByName'
+...nterface\AddOns\ProcSpellOverlay\components\glow.lua:379: in function `AddGlow'
+...face\AddOns\ProcSpellOverlay\options\glowoptions.lua:60: in function <...face\AddOns\ProcSpellOverlay\options\glowoptions.lua:57>
+...ace\AddOns\ProcSpellOverlay\options\classoptions.lua:135: in function <...ace\AddOns\ProcSpellOverlay\options\classoptions.lua:135>
