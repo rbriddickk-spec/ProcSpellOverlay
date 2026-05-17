@@ -43,6 +43,31 @@ local function IsSpellReadyAndUsable(spellID)
   return true
 end
 
+local function db()
+  ProcSpellOverlayDB = ProcSpellOverlayDB or {}
+  ProcSpellOverlayDB.procIcons = ProcSpellOverlayDB.procIcons or {}
+  local p = ProcSpellOverlayDB.procIcons
+
+  if p.enabled == nil then p.enabled = true end
+  if p.locked == nil then p.locked = true end
+  if p.size == nil then p.size = 56 end
+  if p.point == nil then p.point = "CENTER" end
+  if p.x == nil then p.x = 0 end
+  if p.y == nil then p.y = -140 end
+  if p.gap == nil then p.gap = 10 end
+  if p.maxIcons == nil then p.maxIcons = 4 end
+  if p.testMode == nil then p.testMode = false end
+  p.maxIcons = math.max(1, math.floor(tonumber(p.maxIcons) or 4))
+  p.order = p.order or {}
+  for key, defaultOrder in pairs(DefaultOrderBySpec) do
+    if type(p.order[key]) ~= "table" then
+      p.order[key] = CopyTable(defaultOrder)
+    end
+  end
+
+  return p
+end
+
 local function UpdateActiveFromUsability()
   local p = db()
   if not p.enabled then
@@ -80,31 +105,6 @@ local function UpdateActiveFromUsability()
   end
 
   return changed
-end
-
-local function db()
-  ProcSpellOverlayDB = ProcSpellOverlayDB or {}
-  ProcSpellOverlayDB.procIcons = ProcSpellOverlayDB.procIcons or {}
-  local p = ProcSpellOverlayDB.procIcons
-
-  if p.enabled == nil then p.enabled = true end
-  if p.locked == nil then p.locked = true end
-  if p.size == nil then p.size = 56 end
-  if p.point == nil then p.point = "CENTER" end
-  if p.x == nil then p.x = 0 end
-  if p.y == nil then p.y = -140 end
-  if p.gap == nil then p.gap = 10 end
-  if p.maxIcons == nil then p.maxIcons = 4 end
-  if p.testMode == nil then p.testMode = false end
-  p.maxIcons = math.max(1, math.floor(tonumber(p.maxIcons) or 4))
-  p.order = p.order or {}
-  for key, defaultOrder in pairs(DefaultOrderBySpec) do
-    if type(p.order[key]) ~= "table" then
-      p.order[key] = CopyTable(defaultOrder)
-    end
-  end
-
-  return p
 end
 
 local activeByTrigger = {}       -- [triggerSpellID] = displaySpellID
