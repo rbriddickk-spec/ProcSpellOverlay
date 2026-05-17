@@ -21,6 +21,7 @@ local function db()
   if p.y == nil then p.y = -140 end
   if p.gap == nil then p.gap = 10 end
   if p.maxIcons == nil then p.maxIcons = 4 end
+  if p.testMode == nil then p.testMode = false end
   p.maxIcons = math.max(1, math.floor(tonumber(p.maxIcons) or 4))
   p.order = p.order or {}
   for key, defaultOrder in pairs(DefaultOrderBySpec) do
@@ -137,7 +138,7 @@ local function Refresh()
   local hasVisibleIcon = false
   for i = 1, p.maxIcons do
     local spellID = order and order[i] or nil
-    if spellID and active[spellID] then
+    if spellID and (p.testMode or active[spellID]) then
       SetIcon(iconFrames[i], spellID)
       hasVisibleIcon = true
     else
@@ -161,6 +162,17 @@ function SAO:ProcIcons_Deactivate(spellID)
   if type(spellID) ~= "number" then return end
   active[spellID] = nil
   Refresh()
+end
+
+function SAO:ProcIcons_SetTestMode(on)
+  local p = db()
+  p.testMode = on == true
+  Refresh()
+  return p.testMode
+end
+
+function SAO:ProcIcons_ToggleTestMode()
+  return self:ProcIcons_SetTestMode(not db().testMode)
 end
 
 local ev = CreateFrame("Frame")
