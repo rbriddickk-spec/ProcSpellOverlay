@@ -264,6 +264,22 @@
           </OnValueChanged>
         </Scripts>
       </Slider>
+      <CheckButton name="$parentIconsOnlyButton" inherits="InterfaceOptionsCheckButtonTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentProcIconsYSlider" relativePoint="BOTTOMLEFT">
+            <Offset>
+              <AbsDimension x="-24" y="-16"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <PostClick>
+            if (self.ApplyValueToEngine) then
+              self:ApplyValueToEngine(self:GetChecked());
+            end
+          </PostClick>
+        </Scripts>
+      </CheckButton>
       <CheckButton name="$parentSpellAlertDebugButton" inherits="InterfaceOptionsCheckButtonTemplate">
         <Anchors>
           <Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT"/>
