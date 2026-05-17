@@ -70,6 +70,13 @@ end
 for _,checkbox in ipairs(ProcSpellOverlayOptionsPanel.additionalCheckboxes and ProcSpellOverlayOptionsPanel.additionalCheckboxes.glow or {})do
 checkbox:Hide()
 end
+
+-- Ensure Toggle Test remains accessible in proc-icons-only UI
+if ProcSpellOverlayOptionsPanelSpellAlertTestButton then
+ProcSpellOverlayOptionsPanelSpellAlertTestButton:Show()
+ProcSpellOverlayOptionsPanelSpellAlertTestButton:SetAlpha(1)
+ProcSpellOverlayOptionsPanelSpellAlertTestButton:EnableMouse(true)
+end
 end
 
 function ProcSpellOverlayOptionsPanel_Init(self)
@@ -283,6 +290,13 @@ ProcSpellOverlayDB.alert.sound=value
 SAO:ApplySpellAlertSound()
 end
 local testButton=ProcSpellOverlayOptionsPanelSpellAlertTestButton
+-- In proc-icons-only build, this button toggles proc icon test mode.
+-- Ensure it stays visible/enabled even when Spell Alert sliders are hidden.
+if testButton then
+  testButton:Show()
+  testButton:SetAlpha(1)
+  testButton:EnableMouse(true)
+end
 testButton:SetText("Toggle Test")
 testButton.isTesting=ProcSpellOverlayDB.procIcons and ProcSpellOverlayDB.procIcons.testMode==true
 testButton.StartTest=function(self)
@@ -551,6 +565,10 @@ ProcSpellOverlayDB.alert.sound=soundValue
 SAO:ApplySpellAlertSound()
 end
 local testButton=ProcSpellOverlayOptionsPanelSpellAlertTestButton
+if testButton then
+  testButton:Show()
+  testButton:SetAlpha(1)
+end
 testButton:SetEnabled(type(SAO.ProcIcons_ToggleTestMode)=="function")
 local glowingButtonCheckbox=ProcSpellOverlayOptionsPanelGlowingButtons
 glowingButtonCheckbox:SetChecked(isGlowEnabled)
