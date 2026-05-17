@@ -110,16 +110,18 @@ local function ApplyLayout()
   end
 end
 
-local function SetIcon(iconFrame, spellID)
-  if not spellID then
+local function SetIcon(iconFrame, spellID, isPlaceholder)
+  if not spellID and not isPlaceholder then
     iconFrame:Hide()
     iconFrame.spellID = nil
+    iconFrame:SetAlpha(1)
     return
   end
 
-  local tex = GetSpellTexture(spellID)
+  local tex = isPlaceholder and "Interface\\Icons\\INV_Misc_QuestionMark" or GetSpellTexture(spellID)
   iconFrame.icon:SetTexture(tex)
-  iconFrame.spellID = spellID
+  iconFrame.spellID = isPlaceholder and nil or spellID
+  iconFrame:SetAlpha(isPlaceholder and 0.35 or 1)
   iconFrame:Show()
 end
 
@@ -136,26 +138,47 @@ local function Refresh()
 
   local orderKey = GetCurrentClassSpecKey()
   local order = orderKey and p.order and p.order[orderKey] or nil
+  local hasFixedOrder = type(order) == "table" and #order > 0
   if type(SAO.GlowTracker_TrackSpellID)=="function" and type(order)=="table" then
     for _,spellID in ipairs(order) do
       SAO:GlowTracker_TrackSpellID(spellID)
     end
   end
   local hasVisibleIcon = false
-  for i = 1, p.maxIcons do
-    local spellID = order and order[i] or nil
-    if spellID and (p.testMode or active[spellID]) then
-      SetIcon(iconFrames[i], spellID)
-      hasVisibleIcon = true
-    else
-      SetIcon(iconFrames[i], nil)
+  if hasFixedOrder then
+    for i = 1, p.maxIcons do
+      local spellID = order[i]
+      if spellID and (p.testMode or active[spellID]) then
+        SetIcon(iconFrames[i], spellID)
+        hasVisibleIcon = true
+      else
+        SetIcon(iconFrames[i], nil)
+      end
+    end
+  else
+    local activeSpellIDs = {}
+    for spellID in pairs(active) do
+      table.insert(activeSpellIDs, spellID)
+    end
+    table.sort(activeSpellIDs)
+    for i = 1, p.maxIcons do
+      local spellID = activeSpellIDs[i]
+      if spellID then
+        SetIcon(iconFrames[i], spellID)
+        hasVisibleIcon = true
+      elseif p.testMode and #activeSpellIDs == 0 then
+        SetIcon(iconFrames[i], nil, true)
+        hasVisibleIcon = true
+      else
+        SetIcon(iconFrames[i], nil)
+      end
     end
   end
   for i = p.maxIcons + 1, #iconFrames do
     iconFrames[i]:Hide()
   end
 
-  container:SetShown(hasVisibleIcon)
+  container:SetShown(hasVisibleIcon or p.testMode)
 end
 
 function SAO:ProcIcons_Activate(spellID)
