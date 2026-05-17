@@ -48,10 +48,16 @@ texture=texture(self)
 end
 endTime=self:GetSpellEndTime(spellID,endTime)
 self.ShowAllOverlays(self.Frame,spellID,texture,positions,scale,r,g,b,autoPulse,forcePulsePlay,endTime,combatOnly,extra)
+if type(self.ProcIcons_Activate)=='function' then
+self:ProcIcons_Activate(spellID)
+end
 end
 end
 function SAO.DeactivateOverlay(self,spellID)
 self.HideOverlays(self.Frame,spellID)
+if type(self.ProcIcons_Deactivate)=='function' then
+self:ProcIcons_Deactivate(spellID)
+end
 end
 function SAO.RefreshOverlayTimer(self,spellID,endTime)
 endTime=self:GetSpellEndTime(spellID,endTime)

@@ -18,6 +18,7 @@ local revenge=6572
 local shieldSlam=23922
 local slam=1464
 local victoryRush=SAO.IsSoD() and 402927 or 34428
+local whirlwind=190411
 local wildStrike=100130
 local function easyAs123(option)
 return option=="stance:1/2/3"
@@ -314,6 +315,34 @@ buttonOption=false,
 }
 )
 end
+local function useFuryNativeOverlays()
+local nativeOnlyProps={
+overlays={
+[SAO.ERA]={texture="genericarc_05",position="Top"},
+},
+}
+SAO:CreateEffect(
+"execute_fury_native",
+SAO.MOP_AND_ONWARD,
+execute,
+"native",
+nativeOnlyProps
+)
+SAO:CreateEffect(
+"rampage_native",
+SAO.MOP_AND_ONWARD,
+rampage,
+"native",
+nativeOnlyProps
+)
+SAO:CreateEffect(
+"whirlwind_native",
+SAO.MOP_AND_ONWARD,
+whirlwind,
+"native",
+nativeOnlyProps
+)
+end
 local function useSuddenDeath()
 SAO:CreateEffect(
 "sudden_death",
@@ -544,6 +573,7 @@ useRevenge()
 useVictoryRush()
 useRagingBlow()
 useRampageActionUsable()
+useFuryNativeOverlays()
 useSuddenDeath()
 useTasteForBlood()
 useBladestorm()

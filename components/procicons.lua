@@ -2,7 +2,11 @@ local AddonName, SAO = ...
 local Module = "procicons"
 
 -- Minimal, universal "Blizzard-like" proc icon display.
--- Shows up to 2 large icons based on SPELL_ACTIVATION_OVERLAY_SHOW/HIDE.
+-- Shows fixed-order icons for active proc overlays.
+
+local DefaultOrderBySpec = {
+  ["WARRIOR:72"] = {190411, 5308, 184367},
+}
 
 local function db()
   ProcSpellOverlayDB = ProcSpellOverlayDB or {}
@@ -11,46 +15,24 @@ local function db()
 
   if p.enabled == nil then p.enabled = true end
   if p.locked == nil then p.locked = true end
-  if p.size == nil then p.size = 80 end
-  if p.point == nil then p.point, p.x, p.y = "CENTER", 0, -80 end
+  if p.size == nil then p.size = 56 end
+  if p.point == nil then p.point = "CENTER" end
+  if p.x == nil then p.x = 0 end
+  if p.y == nil then p.y = -140 end
   if p.gap == nil then p.gap = 10 end
+  if p.maxIcons == nil then p.maxIcons = 4 end
+  p.maxIcons = math.max(1, math.floor(tonumber(p.maxIcons) or 4))
+  p.order = p.order or {}
+  for key, defaultOrder in pairs(DefaultOrderBySpec) do
+    if type(p.order[key]) ~= "table" then
+      p.order[key] = CopyTable(defaultOrder)
+    end
+  end
 
   return p
 end
 
 local active = {}     -- [spellID] = true
-local order = {}      -- array of spellIDs, most-recent-last
-
-local function tremoveValue(t, v)
-  for i = #t, 1, -1 do
-    if t[i] == v then
-      table.remove(t, i)
-    end
-  end
-end
-
-local function touchOrder(spellID)
-  tremoveValue(order, spellID)
-  table.insert(order, spellID)
-end
-
-local function getMostRecentActive()
-  for i = #order, 1, -1 do
-    local id = order[i]
-    if active[id] then
-      return id
-    end
-  end
-end
-
-local function getSecondMostRecentActive(exclude)
-  for i = #order, 1, -1 do
-    local id = order[i]
-    if id ~= exclude and active[id] then
-      return id
-    end
-  end
-end
 
 local container = CreateFrame("Frame", "SAO_ProcIconsContainer", UIParent)
 container:SetClampedToScreen(true)
@@ -83,28 +65,47 @@ local function CreateIconFrame(name)
   return f
 end
 
-local icon1 = CreateIconFrame("SAO_ProcIcon1")
-local icon2 = CreateIconFrame("SAO_ProcIcon2")
+local iconFrames = {}
+
+local function EnsureIconFrames(count)
+  for i = #iconFrames + 1, count do
+    iconFrames[i] = CreateIconFrame("SAO_ProcIcon"..tostring(i))
+  end
+end
+
+local function GetCurrentClassSpecKey()
+  local _, classFile = UnitClass("player")
+  if not classFile then return nil end
+  local spec = GetSpecialization and GetSpecialization()
+  local specID = spec and GetSpecializationInfo and GetSpecializationInfo(spec) or nil
+  if specID then
+    return classFile..":"..tostring(specID)
+  end
+  return classFile..":0"
+end
 
 local function ApplyLayout()
   local p = db()
+  EnsureIconFrames(p.maxIcons)
 
   container:ClearAllPoints()
   container:SetPoint(p.point, UIParent, p.point, p.x, p.y)
 
   local size = p.size
   local gap = p.gap
+  local maxIcons = p.maxIcons
 
-  container:SetSize(size * 2 + gap, size)
-
-  icon1:SetSize(size, size)
-  icon2:SetSize(size, size)
-
-  icon1:ClearAllPoints()
-  icon2:ClearAllPoints()
-
-  icon1:SetPoint("LEFT", container, "LEFT", 0, 0)
-  icon2:SetPoint("LEFT", icon1, "RIGHT", gap, 0)
+  container:SetSize(size * maxIcons + gap * (maxIcons - 1), size)
+  for i = 1, maxIcons do
+    local icon = iconFrames[i]
+    icon:SetSize(size, size)
+    icon:ClearAllPoints()
+    if i == 1 then
+      icon:SetPoint("LEFT", container, "LEFT", 0, 0)
+    else
+      icon:SetPoint("LEFT", iconFrames[i-1], "RIGHT", gap, 0)
+    end
+  end
 end
 
 local function SetIcon(iconFrame, spellID)
@@ -122,26 +123,50 @@ end
 
 local function Refresh()
   local p = db()
+  ApplyLayout()
   if not p.enabled then
+    for i = 1, #iconFrames do
+      iconFrames[i]:Hide()
+    end
     container:Hide()
     return
   end
 
-  local s1 = getMostRecentActive()
-  local s2 = getSecondMostRecentActive(s1)
-
-  SetIcon(icon1, s1)
-  SetIcon(icon2, s2)
-
-  if s1 or s2 then
-    container:Show()
-  else
-    container:Hide()
+  local orderKey = GetCurrentClassSpecKey()
+  local order = orderKey and p.order and p.order[orderKey] or nil
+  local hasVisibleIcon = false
+  for i = 1, p.maxIcons do
+    local spellID = order and order[i] or nil
+    if spellID and active[spellID] then
+      SetIcon(iconFrames[i], spellID)
+      hasVisibleIcon = true
+    else
+      SetIcon(iconFrames[i], nil)
+    end
   end
+  for i = p.maxIcons + 1, #iconFrames do
+    iconFrames[i]:Hide()
+  end
+
+  container:SetShown(hasVisibleIcon)
+end
+
+function SAO:ProcIcons_Activate(spellID)
+  if type(spellID) ~= "number" then return end
+  active[spellID] = true
+  Refresh()
+end
+
+function SAO:ProcIcons_Deactivate(spellID)
+  if type(spellID) ~= "number" then return end
+  active[spellID] = nil
+  Refresh()
 end
 
 local ev = CreateFrame("Frame")
 ev:RegisterEvent("PLAYER_LOGIN")
+ev:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+ev:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_SHOW")
 ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_HIDE")
 
@@ -150,7 +175,7 @@ pcall(function() ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW") end)
 pcall(function() ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE") end)
 
 ev:SetScript("OnEvent", function(_, event, ...)
-  if event == "PLAYER_LOGIN" then
+  if event == "PLAYER_LOGIN" or event == "PLAYER_SPECIALIZATION_CHANGED" or event == "ACTIVE_TALENT_GROUP_CHANGED" then
     ApplyLayout()
     Refresh()
     return
@@ -160,11 +185,8 @@ ev:SetScript("OnEvent", function(_, event, ...)
   if type(spellID) ~= "number" then return end
 
   if event == "SPELL_ACTIVATION_OVERLAY_SHOW" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" then
-    active[spellID] = true
-    touchOrder(spellID)
+    SAO:ProcIcons_Activate(spellID)
   elseif event == "SPELL_ACTIVATION_OVERLAY_HIDE" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE" then
-    active[spellID] = nil
+    SAO:ProcIcons_Deactivate(spellID)
   end
-
-  Refresh()
 end)
