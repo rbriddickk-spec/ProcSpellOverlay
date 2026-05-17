@@ -7,7 +7,7 @@ local InCombatLockdown = InCombatLockdown
 -- Shows fixed-order icons for active proc overlays.
 
 local DefaultOrderBySpec = {
-  ["WARRIOR:71"] = {7384, 12294, 5308, 1464},
+  ["WARRIOR:71"] = {7384, 167105, 5308, 34428},
   ["WARRIOR:72"] = {190411, 5308, 184367},
   ["WARRIOR:73"] = {23922, 6572, 5308},
 }
@@ -46,7 +46,7 @@ local InternalAliasBySpec = {
   ["WARRIOR:71"] = {
     [60503] = 7384,   -- Taste for Blood -> Overpower
     [280776] = 5308,  -- Sudden Death -> Execute
-    [199854] = 12294, -- Tactician -> Mortal Strike
+    [199854] = 167105, -- Tactician -> Colossus Smash
   },
   ["WARRIOR:72"] = {
     [280776] = 5308, -- Sudden Death -> Execute
@@ -56,38 +56,65 @@ local InternalAliasBySpec = {
   },
 }
 
-local function IsCastableSpellID(spellID)
-  if type(spellID) ~= "number" then return false end
-  if not (GetSpellInfo and GetSpellInfo(spellID)) then return false end
-  if type(IsPassiveSpell) == "function" and IsPassiveSpell(spellID) then
-    return false
+local function NormalizeSpellID(spellID)
+  local id = tonumber(spellID)
+  if not id then return nil end
+  id = math.floor(id)
+  if id <= 0 then return nil end
+  return id
+end
+
+local function HasSpellInfo(spellID)
+  return type(spellID) == "number" and GetSpellInfo and GetSpellInfo(spellID) ~= nil
+end
+
+local function IsPassiveSpellID(spellID)
+  return type(IsPassiveSpell) == "function" and type(spellID) == "number" and IsPassiveSpell(spellID) or false
+end
+
+local function GetAliasValue(aliasTable, triggerSpellID)
+  if type(aliasTable) ~= "table" then return nil end
+  local value = aliasTable[triggerSpellID]
+  if value == nil then
+    value = aliasTable[tostring(triggerSpellID)]
   end
-  if type(IsSpellKnownOrOverridesKnown) == "function" then
-    return IsSpellKnownOrOverridesKnown(spellID)
-  end
-  if type(IsPlayerSpell) == "function" then
-    return IsPlayerSpell(spellID)
-  end
-  if type(IsSpellKnown) == "function" then
-    return IsSpellKnown(spellID)
-  end
-  return true
+  return NormalizeSpellID(value)
 end
 
 local function ResolveDisplaySpellID(triggerSpellID)
-  if type(triggerSpellID) ~= "number" then return nil end
+  triggerSpellID = NormalizeSpellID(triggerSpellID)
+  if not triggerSpellID then return nil end
   local specKey = GetCurrentClassSpecKey and GetCurrentClassSpecKey() or nil
-  local alias = type(GlowTrackerDB) == "table" and type(GlowTrackerDB.alias) == "table" and GlowTrackerDB.alias or nil
-  local bySpecAlias = alias and specKey and type(alias[specKey]) == "table" and alias[specKey][triggerSpellID] or nil
-  local globalAlias = alias and alias[triggerSpellID] or nil
-  local fallbackAlias = specKey and InternalAliasBySpec[specKey] and InternalAliasBySpec[specKey][triggerSpellID] or nil
 
+  -- GlowTracker alias model (read-only):
+  --  1) global:   GlowTrackerDB.alias[triggerSpellID] = displaySpellID
+  --  2) per-spec: GlowTrackerDB.alias["CLASS:specID"][triggerSpellID] = displaySpellID
+  -- Per-spec alias is preferred when present.
+  local alias = type(GlowTrackerDB) == "table" and type(GlowTrackerDB.alias) == "table" and GlowTrackerDB.alias or nil
+  local bySpecAlias = alias and specKey and GetAliasValue(alias[specKey], triggerSpellID) or nil
+  local globalAlias = alias and GetAliasValue(alias, triggerSpellID) or nil
+  local fallbackAlias = specKey and InternalAliasBySpec[specKey] and GetAliasValue(InternalAliasBySpec[specKey], triggerSpellID) or nil
+
+  local candidates = {}
+  local seen = {}
   for _, candidate in ipairs({bySpecAlias, globalAlias, fallbackAlias, triggerSpellID}) do
-    if IsCastableSpellID(candidate) then
+    if type(candidate) == "number" and not seen[candidate] then
+      table.insert(candidates, candidate)
+      seen[candidate] = true
+    end
+  end
+
+  for _, candidate in ipairs(candidates) do
+    if HasSpellInfo(candidate) and not IsPassiveSpellID(candidate) then
       return candidate
     end
   end
-  return nil
+  for _, candidate in ipairs(candidates) do
+    if HasSpellInfo(candidate) then
+      return candidate
+    end
+  end
+  return candidates[1]
 end
 
 local function GetSpellTextureCompat(spellID)
