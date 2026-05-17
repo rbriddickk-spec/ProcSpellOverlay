@@ -51,6 +51,7 @@ end
 
 local PLACEHOLDER_ALPHA = 0.5
 local BORDER_R, BORDER_G, BORDER_B, BORDER_A = 0.82, 0.82, 0.82, 0.9
+local GLOW_SCALE = 1.75
 
 local container = CreateFrame("Frame", "SAO_ProcIconsContainer", UIParent)
 container:SetClampedToScreen(true)
@@ -99,6 +100,15 @@ local function CreateIconFrame(name)
   glowAlphaOut:SetDuration(0.55)
   glowAlphaOut:SetFromAlpha(0.95)
   glowAlphaOut:SetToAlpha(0.35)
+
+  f:SetScript("OnSizeChanged", function(self, w, h)
+    if self.fallbackGlow then
+      local s = math.max(w or 0, h or 0)
+      self.fallbackGlow:ClearAllPoints()
+      self.fallbackGlow:SetPoint("CENTER", self, "CENTER", 0, 0)
+      self.fallbackGlow:SetSize(s * GLOW_SCALE, s * GLOW_SCALE)
+    end
+  end)
 
   f.borderTop = f:CreateTexture(nil, "OVERLAY")
   f.borderRight = f:CreateTexture(nil, "OVERLAY")
@@ -208,7 +218,7 @@ local function ApplyLayout()
 
     icon.fallbackGlow:ClearAllPoints()
     icon.fallbackGlow:SetPoint("CENTER", icon, "CENTER")
-    icon.fallbackGlow:SetSize(size * 1.75, size * 1.75)
+    icon.fallbackGlow:SetSize(size * GLOW_SCALE, size * GLOW_SCALE)
   end
 end
 
