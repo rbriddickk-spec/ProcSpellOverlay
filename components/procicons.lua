@@ -474,10 +474,13 @@ function SAO:ProcIcons_ApplyLayoutAndRefresh()
 end
 
 local ev = CreateFrame("Frame")
+local sawGlowEvents = false
 ev:RegisterEvent("PLAYER_LOGIN")
 ev:RegisterEvent("PLAYER_REGEN_ENABLED")
 ev:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 ev:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_SHOW")
+ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_HIDE")
 ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW")
 ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
 
@@ -495,9 +498,16 @@ ev:SetScript("OnEvent", function(_, event, ...)
   local spellID = ...
   if type(spellID) ~= "number" then return end
 
-  if event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" then
+  local isGlowEvent = event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE"
+  if isGlowEvent then
+    sawGlowEvents = true
+  elseif sawGlowEvents then
+    return
+  end
+
+  if event == "SPELL_ACTIVATION_OVERLAY_SHOW" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" then
     SAO:ProcIcons_Activate(spellID)
-  elseif event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE" then
+  elseif event == "SPELL_ACTIVATION_OVERLAY_HIDE" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE" then
     SAO:ProcIcons_Deactivate(spellID)
   end
 end)
