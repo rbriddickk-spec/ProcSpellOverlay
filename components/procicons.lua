@@ -252,10 +252,10 @@ local function ApplyLayout()
 end
 
 local function SetIconSecureAction(iconFrame, spellID)
-  if type(iconFrame.SetAttribute) ~= "function" then return end
+  if type(iconFrame.SetAttribute) ~= "function" then return true end
   if InCombatLockdown and InCombatLockdown() then
     pendingSecureAttributeRefresh = true
-    return
+    return false
   end
 
   if type(spellID) == "number" then
@@ -266,6 +266,7 @@ local function SetIconSecureAction(iconFrame, spellID)
     iconFrame:SetAttribute("type", nil)
     iconFrame:SetAttribute("spell", nil)
   end
+  return true
 end
 
 local function SetFallbackGlow(iconFrame, shouldGlow)
@@ -284,6 +285,10 @@ end
 
 local function SetIcon(iconFrame, spellID, isPlaceholder)
   if not spellID and not isPlaceholder then
+    if type(iconFrame.spellID) == "number" and active[iconFrame.spellID] then
+      iconFrame:Show()
+      return
+    end
     iconFrame:Hide()
     iconFrame.spellID = nil
     SetIconSecureAction(iconFrame, nil)
@@ -334,14 +339,22 @@ end
 
 local function Refresh()
   local p = db()
-  if InCombatLockdown and not InCombatLockdown() then
-    pendingSecureAttributeRefresh = false
-  end
   ApplyLayout()
   if not p.enabled then
     for i = 1, #iconFrames do
       SetIconGlow(iconFrames[i], false)
       iconFrames[i]:Hide()
+    end
+    if pendingSecureAttributeRefresh and (not InCombatLockdown or not InCombatLockdown()) then
+      local refreshed = true
+      for i = 1, #iconFrames do
+        if not SetIconSecureAction(iconFrames[i], nil) then
+          refreshed = false
+        end
+      end
+      if refreshed then
+        pendingSecureAttributeRefresh = false
+      end
     end
     container:Hide()
     return
@@ -415,6 +428,20 @@ local function Refresh()
     iconFrames[i]:Hide()
   end
 
+  if pendingSecureAttributeRefresh and (not InCombatLockdown or not InCombatLockdown()) then
+    local refreshed = true
+    for i = 1, #iconFrames do
+      local icon = iconFrames[i]
+      local secureSpellID = icon:IsShown() and icon.spellID or nil
+      if not SetIconSecureAction(icon, secureSpellID) then
+        refreshed = false
+      end
+    end
+    if refreshed then
+      pendingSecureAttributeRefresh = false
+    end
+  end
+
   container:SetShown(hasVisibleIcon or p.testMode)
 end
 
@@ -451,8 +478,6 @@ ev:RegisterEvent("PLAYER_LOGIN")
 ev:RegisterEvent("PLAYER_REGEN_ENABLED")
 ev:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 ev:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
-ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_SHOW")
-ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_HIDE")
 ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW")
 ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
 
@@ -470,9 +495,9 @@ ev:SetScript("OnEvent", function(_, event, ...)
   local spellID = ...
   if type(spellID) ~= "number" then return end
 
-  if event == "SPELL_ACTIVATION_OVERLAY_SHOW" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" then
+  if event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" then
     SAO:ProcIcons_Activate(spellID)
-  elseif event == "SPELL_ACTIVATION_OVERLAY_HIDE" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE" then
+  elseif event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE" then
     SAO:ProcIcons_Deactivate(spellID)
   end
 end)
