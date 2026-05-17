@@ -683,6 +683,29 @@ ev:SetScript("OnEvent", function(_, event, ...)
     end
     ApplyLayout()
     Refresh()
+	    -- DEBUG: force show bar briefly so we know runtime path works
+    if event == "PLAYER_LOGIN" then
+      container:Show()
+      EnsureIconFrames(4)
+      -- show something obvious
+      SetIcon(iconFrames[1], 7384)     -- Overpower
+      SetIconGlow(iconFrames[1], true)
+      SetIcon(iconFrames[2], 167105)  -- Colossus Smash
+      SetIconGlow(iconFrames[2], true)
+      SetIcon(iconFrames[3], 5308)    -- Execute
+      SetIconGlow(iconFrames[3], true)
+      SetIcon(iconFrames[4], 34428)   -- Victory Rush
+      SetIconGlow(iconFrames[4], true)
+
+      C_Timer.After(5, function()
+        -- don't break real logic; just hide the forced display
+        for i = 1, 4 do
+          SetIconGlow(iconFrames[i], false)
+          SetIcon(iconFrames[i], nil)
+        end
+        Refresh()
+      end)
+    end
     return
   end
   if event == "PLAYER_REGEN_DISABLED" then
