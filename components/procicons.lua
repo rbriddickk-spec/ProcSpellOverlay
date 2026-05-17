@@ -39,6 +39,9 @@ local function ResolveDisplaySpellID(triggerSpellID)
   return (type(GlowTrackerDB)=="table" and type(GlowTrackerDB.alias)=="table" and GlowTrackerDB.alias[triggerSpellID]) or triggerSpellID
 end
 
+local PLACEHOLDER_ALPHA = 0.5
+local BORDER_R, BORDER_G, BORDER_B, BORDER_A = 0.82, 0.82, 0.82, 0.9
+
 local container = CreateFrame("Frame", "SAO_ProcIconsContainer", UIParent)
 container:SetClampedToScreen(true)
 container:SetMovable(true)
@@ -59,9 +62,21 @@ local function CreateIconFrame(name)
   local f = CreateFrame("Frame", name, container)
   f:Hide()
 
+  f.fill = f:CreateTexture(nil, "BACKGROUND")
+  f.fill:SetAllPoints(true)
+  f.fill:SetColorTexture(0, 0, 0, PLACEHOLDER_ALPHA)
+
   f.icon = f:CreateTexture(nil, "ARTWORK")
   f.icon:SetAllPoints(true)
   f.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+
+  f.borderTop = f:CreateTexture(nil, "OVERLAY")
+  f.borderRight = f:CreateTexture(nil, "OVERLAY")
+  f.borderBottom = f:CreateTexture(nil, "OVERLAY")
+  f.borderLeft = f:CreateTexture(nil, "OVERLAY")
+  for _, border in ipairs({f.borderTop, f.borderRight, f.borderBottom, f.borderLeft}) do
+    border:SetColorTexture(BORDER_R, BORDER_G, BORDER_B, BORDER_A)
+  end
 
   -- Ensure no default button normal/highlight/pushed textures create an inner rectangle.
   if type(f.GetNormalTexture) == "function" then
@@ -77,8 +92,22 @@ local function CreateIconFrame(name)
   if type(f.SetHighlightTexture) == "function" then
     f:SetHighlightTexture(nil)
   end
+  if type(f.GetHighlightTexture) == "function" then
+    local highlight = f:GetHighlightTexture()
+    if highlight then
+      highlight:SetTexture(nil)
+      highlight:Hide()
+    end
+  end
   if type(f.SetPushedTexture) == "function" then
     f:SetPushedTexture(nil)
+  end
+  if type(f.GetPushedTexture) == "function" then
+    local pushed = f:GetPushedTexture()
+    if pushed then
+      pushed:SetTexture(nil)
+      pushed:Hide()
+    end
   end
 
   return f
@@ -114,6 +143,7 @@ local function ApplyLayout()
   local size = p.size
   local gap = p.gap
   local maxIcons = p.maxIcons
+  local borderSize = math.max(1, math.floor(size * 0.04 + 0.5))
 
   container:SetSize(size * maxIcons + gap * (maxIcons - 1), size)
   for i = 1, maxIcons do
@@ -125,6 +155,26 @@ local function ApplyLayout()
     else
       icon:SetPoint("LEFT", iconFrames[i-1], "RIGHT", gap, 0)
     end
+
+    icon.borderTop:ClearAllPoints()
+    icon.borderTop:SetPoint("TOPLEFT", icon, "TOPLEFT", 0, 0)
+    icon.borderTop:SetPoint("TOPRIGHT", icon, "TOPRIGHT", 0, 0)
+    icon.borderTop:SetHeight(borderSize)
+
+    icon.borderBottom:ClearAllPoints()
+    icon.borderBottom:SetPoint("BOTTOMLEFT", icon, "BOTTOMLEFT", 0, 0)
+    icon.borderBottom:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", 0, 0)
+    icon.borderBottom:SetHeight(borderSize)
+
+    icon.borderLeft:ClearAllPoints()
+    icon.borderLeft:SetPoint("TOPLEFT", icon, "TOPLEFT", 0, -borderSize)
+    icon.borderLeft:SetPoint("BOTTOMLEFT", icon, "BOTTOMLEFT", 0, borderSize)
+    icon.borderLeft:SetWidth(borderSize)
+
+    icon.borderRight:ClearAllPoints()
+    icon.borderRight:SetPoint("TOPRIGHT", icon, "TOPRIGHT", 0, -borderSize)
+    icon.borderRight:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", 0, borderSize)
+    icon.borderRight:SetWidth(borderSize)
   end
 end
 
@@ -132,14 +182,24 @@ local function SetIcon(iconFrame, spellID, isPlaceholder)
   if not spellID and not isPlaceholder then
     iconFrame:Hide()
     iconFrame.spellID = nil
-    iconFrame:SetAlpha(1)
+    iconFrame.icon:SetTexture(nil)
+    iconFrame.icon:Hide()
+    iconFrame.fill:Hide()
     return
   end
 
-  local tex = isPlaceholder and "Interface\\Icons\\INV_Misc_QuestionMark" or GetSpellTexture(spellID)
-  iconFrame.icon:SetTexture(tex)
-  iconFrame.spellID = isPlaceholder and nil or spellID
-  iconFrame:SetAlpha(isPlaceholder and 0.35 or 1)
+  local tex = spellID and GetSpellTexture(spellID) or nil
+  local showPlaceholder = isPlaceholder or not tex
+
+  iconFrame.icon:SetShown(not showPlaceholder)
+  iconFrame.fill:SetShown(showPlaceholder)
+  if showPlaceholder then
+    iconFrame.icon:SetTexture(nil)
+    iconFrame.spellID = nil
+  else
+    iconFrame.icon:SetTexture(tex)
+    iconFrame.spellID = spellID
+  end
   iconFrame:Show()
 end
 
@@ -174,13 +234,46 @@ local function Refresh()
   local orderKey = GetCurrentClassSpecKey()
   local order = orderKey and p.order and p.order[orderKey] or nil
   local hasFixedOrder = type(order) == "table" and #order > 0
+  local activeSpellIDs = {}
+  for spellID in pairs(active) do
+    table.insert(activeSpellIDs, spellID)
+  end
+  table.sort(activeSpellIDs)
   local hasVisibleIcon = false
-  if hasFixedOrder then
+  if p.testMode then
+    local usedSpellIDs = {}
+    local activeIndex = 1
+
+    for i = 1, p.maxIcons do
+      local spellID = hasFixedOrder and order[i] or nil
+      if spellID then
+        usedSpellIDs[spellID] = true
+      else
+        while activeSpellIDs[activeIndex] and usedSpellIDs[activeSpellIDs[activeIndex]] do
+          activeIndex = activeIndex + 1
+        end
+        spellID = activeSpellIDs[activeIndex]
+        if spellID then
+          usedSpellIDs[spellID] = true
+          activeIndex = activeIndex + 1
+        end
+      end
+
+      if spellID then
+        SetIcon(iconFrames[i], spellID)
+        SetIconGlow(iconFrames[i], true)
+        hasVisibleIcon = true
+      else
+        SetIcon(iconFrames[i], nil, true)
+        SetIconGlow(iconFrames[i], true)
+        hasVisibleIcon = true
+      end
+    end
+  elseif hasFixedOrder then
     for i = 1, p.maxIcons do
       local spellID = order[i]
-      if spellID and (p.testMode or active[spellID]) then
+      if spellID and active[spellID] then
         SetIcon(iconFrames[i], spellID)
-        -- In test mode, show glow on visible proc icons so users can preview the effect.
         SetIconGlow(iconFrames[i], true)
         hasVisibleIcon = true
       else
@@ -189,19 +282,10 @@ local function Refresh()
       end
     end
   else
-    local activeSpellIDs = {}
-    for spellID in pairs(active) do
-      table.insert(activeSpellIDs, spellID)
-    end
-    table.sort(activeSpellIDs)
     for i = 1, p.maxIcons do
       local spellID = activeSpellIDs[i]
       if spellID then
         SetIcon(iconFrames[i], spellID)
-        SetIconGlow(iconFrames[i], true)
-        hasVisibleIcon = true
-      elseif p.testMode and #activeSpellIDs == 0 then
-        SetIcon(iconFrames[i], nil, true)
         SetIconGlow(iconFrames[i], true)
         hasVisibleIcon = true
       else
