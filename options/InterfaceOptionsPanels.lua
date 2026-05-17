@@ -54,8 +54,12 @@ ProcSpellOverlayOptionsPanelSpellAlertResponsiveButton,
 ProcSpellOverlayOptionsPanelSpellAlertAskDisableGameAlertButton,
 }) do
 if frame then frame:Hide() end
-if ProcSpellOverlayOptionsPanelSpellAlertTestButton then
-  ProcSpellOverlayOptionsPanelSpellAlertTestButton:Show()
+if ProcSpellOverlayOptionsPanelSpellAlertTestButton and ProcSpellOverlayOptionsPanelProcIconsEnabled then
+  local b = ProcSpellOverlayOptionsPanelSpellAlertTestButton
+  b:ClearAllPoints()
+  b:SetPoint("TOPLEFT", ProcSpellOverlayOptionsPanelProcIconsEnabled, "TOPLEFT", 340, 0)
+  b:Show()
+  b:SetAlpha(1)
 end
 end
 if ProcSpellOverlayOptionsPanelSpellAlertLabel then
@@ -102,6 +106,33 @@ if checked then
 disableCondition.OnValueChanged(self,true)
 ProcSpellOverlayOptionsPanel.globalOff:Show()
 local testButton=ProcSpellOverlayOptionsPanelSpellAlertTestButton
+local function AnchorProcIconsTestButton()
+  local b = ProcSpellOverlayOptionsPanelSpellAlertTestButton
+  local procEnabled = ProcSpellOverlayOptionsPanelProcIconsEnabled
+  if not b or not procEnabled then return end
+
+  -- If something wiped our anchor, put it back
+  if not b:GetPoint(1) then
+    b:ClearAllPoints()
+    b:SetPoint("TOPLEFT", procEnabled, "TOPLEFT", 340, 0)
+  end
+
+  b:Show()
+  b:SetAlpha(1)
+  b:EnableMouse(true)
+end
+
+-- Re-anchor once during init
+AnchorProcIconsTestButton()
+
+-- And re-anchor any time something clears points
+if testButton and not testButton.__saoAnchorHooked then
+  testButton.__saoAnchorHooked = true
+  hooksecurefunc(testButton, "ClearAllPoints", function()
+    -- Delay one frame to let the caller finish its layout work
+    C_Timer.After(0, AnchorProcIconsTestButton)
+  end)
+end
 if testButton.isTesting then
 testButton:StopTest()
 end
