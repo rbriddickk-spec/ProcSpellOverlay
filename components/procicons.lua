@@ -7,7 +7,9 @@ local InCombatLockdown = InCombatLockdown
 -- Shows fixed-order icons for active proc overlays.
 
 local DefaultOrderBySpec = {
+  ["WARRIOR:71"] = {7384, 12294, 5308, 1464},
   ["WARRIOR:72"] = {190411, 5308, 184367},
+  ["WARRIOR:73"] = {23922, 6572, 5308},
 }
 
 local function db()
@@ -35,10 +37,57 @@ local function db()
   return p
 end
 
-local active = {}     -- [spellID] = true
+local activeByTrigger = {}       -- [triggerSpellID] = displaySpellID
+local activeDisplayRefCount = {} -- [displaySpellID] = count
 local pendingSecureAttributeRefresh = false
+local GetCurrentClassSpecKey
+
+local InternalAliasBySpec = {
+  ["WARRIOR:71"] = {
+    [60503] = 7384,   -- Taste for Blood -> Overpower
+    [280776] = 5308,  -- Sudden Death -> Execute
+    [199854] = 12294, -- Tactician -> Mortal Strike
+  },
+  ["WARRIOR:72"] = {
+    [280776] = 5308, -- Sudden Death -> Execute
+  },
+  ["WARRIOR:73"] = {
+    [280776] = 5308, -- Sudden Death -> Execute
+  },
+}
+
+local function IsCastableSpellID(spellID)
+  if type(spellID) ~= "number" then return false end
+  if not (GetSpellInfo and GetSpellInfo(spellID)) then return false end
+  if type(IsPassiveSpell) == "function" and IsPassiveSpell(spellID) then
+    return false
+  end
+  if type(IsSpellKnownOrOverridesKnown) == "function" then
+    return IsSpellKnownOrOverridesKnown(spellID)
+  end
+  if type(IsPlayerSpell) == "function" then
+    return IsPlayerSpell(spellID)
+  end
+  if type(IsSpellKnown) == "function" then
+    return IsSpellKnown(spellID)
+  end
+  return true
+end
+
 local function ResolveDisplaySpellID(triggerSpellID)
-  return (type(GlowTrackerDB)=="table" and type(GlowTrackerDB.alias)=="table" and GlowTrackerDB.alias[triggerSpellID]) or triggerSpellID
+  if type(triggerSpellID) ~= "number" then return nil end
+  local specKey = GetCurrentClassSpecKey and GetCurrentClassSpecKey() or nil
+  local alias = type(GlowTrackerDB) == "table" and type(GlowTrackerDB.alias) == "table" and GlowTrackerDB.alias or nil
+  local bySpecAlias = alias and specKey and type(alias[specKey]) == "table" and alias[specKey][triggerSpellID] or nil
+  local globalAlias = alias and alias[triggerSpellID] or nil
+  local fallbackAlias = specKey and InternalAliasBySpec[specKey] and InternalAliasBySpec[specKey][triggerSpellID] or nil
+
+  for _, candidate in ipairs({bySpecAlias, globalAlias, fallbackAlias, triggerSpellID}) do
+    if IsCastableSpellID(candidate) then
+      return candidate
+    end
+  end
+  return nil
 end
 
 local function GetSpellTextureCompat(spellID)
@@ -154,13 +203,14 @@ local function CreateIconFrame(name)
   end
 
   f:SetScript("OnEnter", function(self)
-    if type(self.spellID) ~= "number" then
+    local tooltipSpellID = self.displaySpellID
+    if type(tooltipSpellID) ~= "number" then
       return
     end
-    local spellName = GetSpellInfo and GetSpellInfo(self.spellID) or nil
+    local spellName = GetSpellInfo and GetSpellInfo(tooltipSpellID) or nil
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-    GameTooltip:SetText(spellName or ("Spell "..tostring(self.spellID)), 1, 1, 1)
-    GameTooltip:AddLine("Spell ID: "..tostring(self.spellID), 0.8, 0.8, 0.8)
+    GameTooltip:SetText(spellName or ("Spell "..tostring(tooltipSpellID)), 1, 1, 1)
+    GameTooltip:AddLine("Spell ID: "..tostring(tooltipSpellID), 0.8, 0.8, 0.8)
     GameTooltip:Show()
   end)
   f:SetScript("OnLeave", function()
@@ -178,7 +228,7 @@ local function EnsureIconFrames(count)
   end
 end
 
-local function GetCurrentClassSpecKey()
+function GetCurrentClassSpecKey()
   local _, classFile = UnitClass("player")
   if not classFile then return nil end
   local spec = GetSpecialization and GetSpecialization()
@@ -187,6 +237,11 @@ local function GetCurrentClassSpecKey()
     return classFile..":"..tostring(specID)
   end
   return classFile..":0"
+end
+
+local function ResetActive()
+  wipe(activeByTrigger)
+  wipe(activeDisplayRefCount)
 end
 
 local function ApplyLayout()
@@ -285,11 +340,8 @@ end
 
 local function SetIcon(iconFrame, spellID, isPlaceholder)
   if not spellID and not isPlaceholder then
-    if type(iconFrame.spellID) == "number" and active[iconFrame.spellID] then
-      iconFrame:Show()
-      return
-    end
     iconFrame:Hide()
+    iconFrame.displaySpellID = nil
     iconFrame.spellID = nil
     SetIconSecureAction(iconFrame, nil)
     iconFrame.icon:SetTexture(nil)
@@ -308,11 +360,13 @@ local function SetIcon(iconFrame, spellID, isPlaceholder)
     iconFrame.icon:SetVertexColor(1, 1, 1, 1)
     iconFrame.fill:SetColorTexture(0, 0, 0, PLACEHOLDER_ALPHA)
     iconFrame.fill:SetVertexColor(1, 1, 1, 1)
+    iconFrame.displaySpellID = nil
     iconFrame.spellID = nil
     SetIconSecureAction(iconFrame, nil)
   else
     iconFrame.icon:SetTexture(tex)
     iconFrame.icon:SetVertexColor(1, 1, 1, 1)
+    iconFrame.displaySpellID = spellID
     iconFrame.spellID = spellID
     SetIconSecureAction(iconFrame, spellID)
   end
@@ -364,8 +418,10 @@ local function Refresh()
   local order = orderKey and p.order and p.order[orderKey] or nil
   local hasFixedOrder = type(order) == "table" and #order > 0
   local activeSpellIDs = {}
-  for spellID in pairs(active) do
-    table.insert(activeSpellIDs, spellID)
+  for spellID, count in pairs(activeDisplayRefCount) do
+    if count and count > 0 then
+      table.insert(activeSpellIDs, spellID)
+    end
   end
   table.sort(activeSpellIDs)
   local hasVisibleIcon = false
@@ -401,7 +457,7 @@ local function Refresh()
   elseif hasFixedOrder then
     for i = 1, p.maxIcons do
       local spellID = order[i]
-      if spellID and active[spellID] then
+      if spellID and (activeDisplayRefCount[spellID] or 0) > 0 then
         SetIcon(iconFrames[i], spellID)
         SetIconGlow(iconFrames[i], true)
         hasVisibleIcon = true
@@ -447,13 +503,38 @@ end
 
 function SAO:ProcIcons_Activate(spellID)
   if type(spellID) ~= "number" then return end
-  active[ResolveDisplaySpellID(spellID)] = true
+  local displaySpellID = ResolveDisplaySpellID(spellID)
+  if type(displaySpellID) ~= "number" then return end
+  local previousDisplaySpellID = activeByTrigger[spellID]
+  if previousDisplaySpellID == displaySpellID then
+    Refresh()
+    return
+  end
+  if type(previousDisplaySpellID) == "number" then
+    local previousCount = (activeDisplayRefCount[previousDisplaySpellID] or 0) - 1
+    if previousCount > 0 then
+      activeDisplayRefCount[previousDisplaySpellID] = previousCount
+    else
+      activeDisplayRefCount[previousDisplaySpellID] = nil
+    end
+  end
+  activeByTrigger[spellID] = displaySpellID
+  activeDisplayRefCount[displaySpellID] = (activeDisplayRefCount[displaySpellID] or 0) + 1
   Refresh()
 end
 
 function SAO:ProcIcons_Deactivate(spellID)
   if type(spellID) ~= "number" then return end
-  active[ResolveDisplaySpellID(spellID)] = nil
+  local displaySpellID = activeByTrigger[spellID] or ResolveDisplaySpellID(spellID)
+  activeByTrigger[spellID] = nil
+  if type(displaySpellID) == "number" then
+    local count = (activeDisplayRefCount[displaySpellID] or 0) - 1
+    if count > 0 then
+      activeDisplayRefCount[displaySpellID] = count
+    else
+      activeDisplayRefCount[displaySpellID] = nil
+    end
+  end
   Refresh()
 end
 
@@ -476,6 +557,7 @@ end
 local ev = CreateFrame("Frame")
 local sawGlowEvents = false
 ev:RegisterEvent("PLAYER_LOGIN")
+ev:RegisterEvent("PLAYER_REGEN_DISABLED")
 ev:RegisterEvent("PLAYER_REGEN_ENABLED")
 ev:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 ev:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
@@ -486,12 +568,27 @@ ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
 
 ev:SetScript("OnEvent", function(_, event, ...)
   if event == "PLAYER_LOGIN" or event == "PLAYER_SPECIALIZATION_CHANGED" or event == "ACTIVE_TALENT_GROUP_CHANGED" then
+    if event ~= "PLAYER_LOGIN" then
+      ResetActive()
+      sawGlowEvents = false
+    end
     ApplyLayout()
     Refresh()
     return
   end
-  if event == "PLAYER_REGEN_ENABLED" and pendingSecureAttributeRefresh then
-    Refresh()
+  if event == "PLAYER_REGEN_DISABLED" then
+    for i = 1, #iconFrames do
+      iconFrames[i]:RegisterForClicks()
+    end
+    return
+  end
+  if event == "PLAYER_REGEN_ENABLED" then
+    for i = 1, #iconFrames do
+      iconFrames[i]:RegisterForClicks("LeftButtonUp")
+    end
+    if pendingSecureAttributeRefresh then
+      Refresh()
+    end
     return
   end
 
