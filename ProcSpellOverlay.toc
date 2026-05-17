@@ -3,7 +3,7 @@
 ## Notes: Display overlays and glow buttons to improve your gameplay!
 ## Author:
 ## Version: 3.8.2
-## SavedVariables: ProcSpellOverlayDB, GlowTrackerDB
+## SavedVariables: ProcSpellOverlayDB
 ## IconTexture: Interface/AddOns/ProcSpellOverlay/textures/icon64
 ## X-SAO-Build: wod
 
