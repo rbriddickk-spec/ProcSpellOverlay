@@ -88,9 +88,10 @@ end
 local function ApplyLayout()
   local p = db()
   EnsureIconFrames(p.maxIcons)
+  local point = p.point or "CENTER"
 
   container:ClearAllPoints()
-  container:SetPoint(p.point, UIParent, p.point, p.x, p.y)
+  container:SetPoint(point, UIParent, point, p.x, p.y)
 
   local size = p.size
   local gap = p.gap
@@ -173,6 +174,11 @@ end
 
 function SAO:ProcIcons_ToggleTestMode()
   return self:ProcIcons_SetTestMode(not db().testMode)
+end
+
+function SAO:ProcIcons_ApplyLayoutAndRefresh()
+  ApplyLayout()
+  Refresh()
 end
 
 local ev = CreateFrame("Frame")

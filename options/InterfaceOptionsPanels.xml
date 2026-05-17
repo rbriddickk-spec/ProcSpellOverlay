@@ -168,6 +168,102 @@
           </PostClick>
         </Scripts>
       </CheckButton>
+      <CheckButton name="$parentProcIconsEnabled" inherits="InterfaceOptionsCheckButtonTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentSpellAlertTestButton" relativePoint="TOPRIGHT">
+            <Offset>
+              <AbsDimension x="240" y="2"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <PostClick>
+            if (self.ApplyValueToEngine) then
+              self:ApplyValueToEngine(self:GetChecked());
+            end
+          </PostClick>
+        </Scripts>
+      </CheckButton>
+      <Slider name="$parentProcIconsSizeSlider" inherits="OptionsSliderTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentProcIconsEnabled" relativePoint="BOTTOMLEFT">
+            <Offset>
+              <AbsDimension x="24" y="-12"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnValueChanged>
+            value = math.floor(value + 0.5);
+            self.value = value;
+            self:SetValue(value);
+
+            if (self.ApplyValueToEngine) then
+              self:ApplyValueToEngine(value);
+            end
+          </OnValueChanged>
+        </Scripts>
+      </Slider>
+      <Slider name="$parentProcIconsGapSlider" inherits="OptionsSliderTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentProcIconsSizeSlider" relativePoint="BOTTOMLEFT">
+            <Offset>
+              <AbsDimension x="0" y="-32"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnValueChanged>
+            value = math.floor(value + 0.5);
+            self.value = value;
+            self:SetValue(value);
+
+            if (self.ApplyValueToEngine) then
+              self:ApplyValueToEngine(value);
+            end
+          </OnValueChanged>
+        </Scripts>
+      </Slider>
+      <Slider name="$parentProcIconsXSlider" inherits="OptionsSliderTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentProcIconsGapSlider" relativePoint="BOTTOMLEFT">
+            <Offset>
+              <AbsDimension x="0" y="-32"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnValueChanged>
+            value = math.floor(value + 0.5);
+            self.value = value;
+            self:SetValue(value);
+
+            if (self.ApplyValueToEngine) then
+              self:ApplyValueToEngine(value);
+            end
+          </OnValueChanged>
+        </Scripts>
+      </Slider>
+      <Slider name="$parentProcIconsYSlider" inherits="OptionsSliderTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentProcIconsXSlider" relativePoint="BOTTOMLEFT">
+            <Offset>
+              <AbsDimension x="0" y="-32"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnValueChanged>
+            value = math.floor(value + 0.5);
+            self.value = value;
+            self:SetValue(value);
+
+            if (self.ApplyValueToEngine) then
+              self:ApplyValueToEngine(value);
+            end
+          </OnValueChanged>
+        </Scripts>
+      </Slider>
       <CheckButton name="$parentSpellAlertDebugButton" inherits="InterfaceOptionsCheckButtonTemplate">
         <Anchors>
           <Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT"/>
@@ -344,6 +440,17 @@
             <Anchor point="TOPLEFT" relativeTo="$parentSpellAlertTestButton" relativePoint="TOPRIGHT">
               <Offset>
                 <AbsDimension x="24" y="10"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </FontString>
+      </Layer>
+      <Layer level="ARTWORK">
+        <FontString name="$parentProcIconsLabel" text="Proc Icons" inherits="GameFontHighlight" justifyH="LEFT" justifyV="TOP">
+          <Anchors>
+            <Anchor point="BOTTOMLEFT" relativeTo="$parentProcIconsEnabled" relativePoint="TOPLEFT">
+              <Offset>
+                <AbsDimension x="0" y="6"/>
               </Offset>
             </Anchor>
           </Anchors>
