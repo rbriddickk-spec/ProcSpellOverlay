@@ -131,9 +131,9 @@
       <Button name="$parentSpellAlertTestButton" inherits="UIPanelButtonTemplate">
         <Size x="96" y="22"/>
         <Anchors>
-          <Anchor point="TOPLEFT" relativeTo="$parentSpellAlertOpacitySlider" relativePoint="TOPRIGHT">
+          <Anchor point="TOPLEFT" relativeTo="$parentProcIconsYSlider" relativePoint="BOTTOMLEFT">
             <Offset>
-              <AbsDimension x="24" y="2"/>
+              <AbsDimension x="24" y="-20"/>
             </Offset>
           </Anchor>
         </Anchors>
@@ -170,9 +170,9 @@
       </CheckButton>
       <CheckButton name="$parentProcIconsEnabled" inherits="InterfaceOptionsCheckButtonTemplate">
         <Anchors>
-          <Anchor point="TOPLEFT" relativeTo="$parentSpellAlertTestButton" relativePoint="TOPRIGHT">
+          <Anchor point="TOPLEFT">
             <Offset>
-              <AbsDimension x="240" y="2"/>
+              <AbsDimension x="40" y="-32"/>
             </Offset>
           </Anchor>
         </Anchors>
@@ -185,6 +185,7 @@
         </Scripts>
       </CheckButton>
       <Slider name="$parentProcIconsSizeSlider" inherits="OptionsSliderTemplate">
+        <Size x="220" y="16"/>
         <Anchors>
           <Anchor point="TOPLEFT" relativeTo="$parentProcIconsEnabled" relativePoint="BOTTOMLEFT">
             <Offset>
@@ -205,6 +206,7 @@
         </Scripts>
       </Slider>
       <Slider name="$parentProcIconsGapSlider" inherits="OptionsSliderTemplate">
+        <Size x="220" y="16"/>
         <Anchors>
           <Anchor point="TOPLEFT" relativeTo="$parentProcIconsSizeSlider" relativePoint="BOTTOMLEFT">
             <Offset>
@@ -225,6 +227,7 @@
         </Scripts>
       </Slider>
       <Slider name="$parentProcIconsXSlider" inherits="OptionsSliderTemplate">
+        <Size x="220" y="16"/>
         <Anchors>
           <Anchor point="TOPLEFT" relativeTo="$parentProcIconsGapSlider" relativePoint="BOTTOMLEFT">
             <Offset>
@@ -245,6 +248,7 @@
         </Scripts>
       </Slider>
       <Slider name="$parentProcIconsYSlider" inherits="OptionsSliderTemplate">
+        <Size x="220" y="16"/>
         <Anchors>
           <Anchor point="TOPLEFT" relativeTo="$parentProcIconsXSlider" relativePoint="BOTTOMLEFT">
             <Offset>
@@ -264,22 +268,6 @@
           </OnValueChanged>
         </Scripts>
       </Slider>
-      <CheckButton name="$parentIconsOnlyButton" inherits="InterfaceOptionsCheckButtonTemplate">
-        <Anchors>
-          <Anchor point="TOPLEFT" relativeTo="$parentProcIconsYSlider" relativePoint="BOTTOMLEFT">
-            <Offset>
-              <AbsDimension x="-24" y="-16"/>
-            </Offset>
-          </Anchor>
-        </Anchors>
-        <Scripts>
-          <PostClick>
-            if (self.ApplyValueToEngine) then
-              self:ApplyValueToEngine(self:GetChecked());
-            end
-          </PostClick>
-        </Scripts>
-      </CheckButton>
       <CheckButton name="$parentSpellAlertDebugButton" inherits="InterfaceOptionsCheckButtonTemplate">
         <Anchors>
           <Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT"/>
