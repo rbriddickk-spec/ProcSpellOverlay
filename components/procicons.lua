@@ -1,6 +1,7 @@
 local AddonName, SAO = ...
 local Module = "procicons"
 local LBG = LibStub and LibStub("LibButtonGlow-1.0", true)
+local InCombatLockdown = InCombatLockdown
 
 -- Minimal, universal "Blizzard-like" proc icon display.
 -- Shows fixed-order icons for active proc overlays.
@@ -35,6 +36,7 @@ local function db()
 end
 
 local active = {}     -- [spellID] = true
+local pendingSecureAttributeRefresh = false
 local function ResolveDisplaySpellID(triggerSpellID)
   return (type(GlowTrackerDB)=="table" and type(GlowTrackerDB.alias)=="table" and GlowTrackerDB.alias[triggerSpellID]) or triggerSpellID
 end
@@ -70,8 +72,9 @@ container:SetScript("OnDragStop", function(self)
 end)
 
 local function CreateIconFrame(name)
-  local f = CreateFrame("Frame", name, container)
+  local f = CreateFrame("Button", name, container, "SecureActionButtonTemplate")
   f:Hide()
+  f:RegisterForClicks("LeftButtonUp")
 
   f.fill = f:CreateTexture(nil, "BACKGROUND")
   f.fill:SetAllPoints(true)
@@ -150,6 +153,20 @@ local function CreateIconFrame(name)
     end
   end
 
+  f:SetScript("OnEnter", function(self)
+    if type(self.spellID) ~= "number" then
+      return
+    end
+    local spellName = GetSpellInfo and GetSpellInfo(self.spellID) or nil
+    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    GameTooltip:SetText(spellName or ("Spell "..tostring(self.spellID)), 1, 1, 1)
+    GameTooltip:AddLine("Spell ID: "..tostring(self.spellID), 0.8, 0.8, 0.8)
+    GameTooltip:Show()
+  end)
+  f:SetScript("OnLeave", function()
+    GameTooltip:Hide()
+  end)
+
   return f
 end
 
@@ -219,6 +236,35 @@ local function ApplyLayout()
     icon.fallbackGlow:ClearAllPoints()
     icon.fallbackGlow:SetPoint("CENTER", icon, "CENTER")
     icon.fallbackGlow:SetSize(size * GLOW_SCALE, size * GLOW_SCALE)
+
+    local hasLBG = LBG and type(LBG.ShowOverlayGlow) == "function" and type(LBG.HideOverlayGlow) == "function"
+    if hasLBG and icon.__saoProcGlowShown then
+      LBG.HideOverlayGlow(icon)
+      LBG.ShowOverlayGlow(icon)
+    end
+    if icon.__saoProcFallbackGlowShown then
+      icon.fallbackGlowAnim:Stop()
+      icon.fallbackGlow:Hide()
+      icon.fallbackGlow:Show()
+      icon.fallbackGlowAnim:Play()
+    end
+  end
+end
+
+local function SetIconSecureAction(iconFrame, spellID)
+  if type(iconFrame.SetAttribute) ~= "function" then return end
+  if InCombatLockdown and InCombatLockdown() then
+    pendingSecureAttributeRefresh = true
+    return
+  end
+
+  if type(spellID) == "number" then
+    local spellName = GetSpellInfo and GetSpellInfo(spellID) or nil
+    iconFrame:SetAttribute("type", "spell")
+    iconFrame:SetAttribute("spell", spellName or spellID)
+  else
+    iconFrame:SetAttribute("type", nil)
+    iconFrame:SetAttribute("spell", nil)
   end
 end
 
@@ -240,6 +286,7 @@ local function SetIcon(iconFrame, spellID, isPlaceholder)
   if not spellID and not isPlaceholder then
     iconFrame:Hide()
     iconFrame.spellID = nil
+    SetIconSecureAction(iconFrame, nil)
     iconFrame.icon:SetTexture(nil)
     iconFrame.icon:Hide()
     iconFrame.fill:Hide()
@@ -257,10 +304,12 @@ local function SetIcon(iconFrame, spellID, isPlaceholder)
     iconFrame.fill:SetColorTexture(0, 0, 0, PLACEHOLDER_ALPHA)
     iconFrame.fill:SetVertexColor(1, 1, 1, 1)
     iconFrame.spellID = nil
+    SetIconSecureAction(iconFrame, nil)
   else
     iconFrame.icon:SetTexture(tex)
     iconFrame.icon:SetVertexColor(1, 1, 1, 1)
     iconFrame.spellID = spellID
+    SetIconSecureAction(iconFrame, spellID)
   end
   iconFrame:Show()
 end
@@ -285,6 +334,9 @@ end
 
 local function Refresh()
   local p = db()
+  if InCombatLockdown and not InCombatLockdown() then
+    pendingSecureAttributeRefresh = false
+  end
   ApplyLayout()
   if not p.enabled then
     for i = 1, #iconFrames do
@@ -396,6 +448,7 @@ end
 
 local ev = CreateFrame("Frame")
 ev:RegisterEvent("PLAYER_LOGIN")
+ev:RegisterEvent("PLAYER_REGEN_ENABLED")
 ev:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 ev:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_SHOW")
@@ -406,6 +459,10 @@ ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
 ev:SetScript("OnEvent", function(_, event, ...)
   if event == "PLAYER_LOGIN" or event == "PLAYER_SPECIALIZATION_CHANGED" or event == "ACTIVE_TALENT_GROUP_CHANGED" then
     ApplyLayout()
+    Refresh()
+    return
+  end
+  if event == "PLAYER_REGEN_ENABLED" and pendingSecureAttributeRefresh then
     Refresh()
     return
   end
