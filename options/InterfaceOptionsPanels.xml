@@ -131,9 +131,9 @@
       <Button name="$parentSpellAlertTestButton" inherits="UIPanelButtonTemplate">
         <Size x="96" y="22"/>
         <Anchors>
-          <Anchor point="TOPLEFT" relativeTo="$parentProcIconsYSlider" relativePoint="BOTTOMLEFT">
+          <Anchor point="TOPLEFT" relativeTo="$parentProcIconsEnabled" relativePoint="TOPLEFT">
             <Offset>
-              <AbsDimension x="24" y="-20"/>
+              <AbsDimension x="140" y="0"/>
             </Offset>
           </Anchor>
         </Anchors>

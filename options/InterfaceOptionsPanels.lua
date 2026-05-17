@@ -54,6 +54,9 @@ ProcSpellOverlayOptionsPanelSpellAlertResponsiveButton,
 ProcSpellOverlayOptionsPanelSpellAlertAskDisableGameAlertButton,
 }) do
 if frame then frame:Hide() end
+if ProcSpellOverlayOptionsPanelSpellAlertTestButton then
+  ProcSpellOverlayOptionsPanelSpellAlertTestButton:Show()
+end
 end
 if ProcSpellOverlayOptionsPanelSpellAlertLabel then
 ProcSpellOverlayOptionsPanelSpellAlertLabel:Hide()
