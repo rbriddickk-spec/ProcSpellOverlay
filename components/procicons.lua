@@ -92,8 +92,22 @@ local function CreateIconFrame(name)
   if type(f.SetHighlightTexture) == "function" then
     f:SetHighlightTexture(nil)
   end
+  if type(f.GetHighlightTexture) == "function" then
+    local highlight = f:GetHighlightTexture()
+    if highlight then
+      highlight:SetTexture(nil)
+      highlight:Hide()
+    end
+  end
   if type(f.SetPushedTexture) == "function" then
     f:SetPushedTexture(nil)
+  end
+  if type(f.GetPushedTexture) == "function" then
+    local pushed = f:GetPushedTexture()
+    if pushed then
+      pushed:SetTexture(nil)
+      pushed:Hide()
+    end
   end
 
   return f
