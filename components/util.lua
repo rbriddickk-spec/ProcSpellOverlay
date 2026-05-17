@@ -109,30 +109,12 @@ end
 end
 return classFile,specName
 end
-function SAO:GlowTracker_TrackSpellID(spellID,classFile,specName)
-if type(spellID)~="number" then return end
-if type(GlowTrackerDB)~="table" then
-GlowTrackerDB={}
-end
-GlowTrackerDB.glows=GlowTrackerDB.glows or {}
-classFile=classFile or select(2,UnitClass("player")) or "UNKNOWN"
-if not specName then
-local _,resolvedSpecName=getCurrentClassAndSpec()
-specName=resolvedSpecName
-end
-GlowTrackerDB.glows[classFile]=GlowTrackerDB.glows[classFile] or {}
-GlowTrackerDB.glows[classFile][specName]=GlowTrackerDB.glows[classFile][specName] or {}
-GlowTrackerDB.glows[classFile][specName][spellID]=true
-end
 function SAO:ReportUnknownEffect(prefix,spellID,texture,positions,scale,r,g,b)
 if not self:AreEffectsInitialized() then return end
 if not spellID then return end
 if self:GetBucketBySpellID(spellID) then return end
 if self:IsAka(spellID) then return end
 local classFile,specName=getCurrentClassAndSpec()
-if type(self.GlowTracker_TrackSpellID)=="function" then
-self:GlowTracker_TrackSpellID(spellID,classFile,specName)
-end
 ProcSpellOverlayDB = ProcSpellOverlayDB or {}
 ProcSpellOverlayDB.unknownProcs = ProcSpellOverlayDB.unknownProcs or {}
 local key=table.concat({

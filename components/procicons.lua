@@ -34,6 +34,9 @@ local function db()
 end
 
 local active = {}     -- [spellID] = true
+local function ResolveDisplaySpellID(triggerSpellID)
+  return (type(GlowTrackerDB)=="table" and type(GlowTrackerDB.alias)=="table" and GlowTrackerDB.alias[triggerSpellID]) or triggerSpellID
+end
 
 local container = CreateFrame("Frame", "SAO_ProcIconsContainer", UIParent)
 container:SetClampedToScreen(true)
@@ -139,11 +142,6 @@ local function Refresh()
   local orderKey = GetCurrentClassSpecKey()
   local order = orderKey and p.order and p.order[orderKey] or nil
   local hasFixedOrder = type(order) == "table" and #order > 0
-  if type(SAO.GlowTracker_TrackSpellID)=="function" and type(order)=="table" then
-    for _,spellID in ipairs(order) do
-      SAO:GlowTracker_TrackSpellID(spellID)
-    end
-  end
   local hasVisibleIcon = false
   if hasFixedOrder then
     for i = 1, p.maxIcons do
@@ -183,16 +181,13 @@ end
 
 function SAO:ProcIcons_Activate(spellID)
   if type(spellID) ~= "number" then return end
-  if type(self.GlowTracker_TrackSpellID)=="function" then
-    self:GlowTracker_TrackSpellID(spellID)
-  end
-  active[spellID] = true
+  active[ResolveDisplaySpellID(spellID)] = true
   Refresh()
 end
 
 function SAO:ProcIcons_Deactivate(spellID)
   if type(spellID) ~= "number" then return end
-  active[spellID] = nil
+  active[ResolveDisplaySpellID(spellID)] = nil
   Refresh()
 end
 
