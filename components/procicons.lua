@@ -597,6 +597,8 @@ ev:SetScript("OnEvent", function(_, event, ...)
   if event == "PLAYER_LOGIN" or event == "PLAYER_SPECIALIZATION_CHANGED" or event == "ACTIVE_TALENT_GROUP_CHANGED" then
     if event ~= "PLAYER_LOGIN" then
       ResetActive()
+	  ev.__saoGlowShowSeen = false
+	  ev.__saoGlowHideSeen = false
       sawGlowEvents = false
     end
     ApplyLayout()
@@ -622,10 +624,27 @@ ev:SetScript("OnEvent", function(_, event, ...)
   local spellID = ...
   if type(spellID) ~= "number" then return end
 
-  local isGlowEvent = event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE"
-  if isGlowEvent then
-    sawGlowEvents = true
-  elseif sawGlowEvents then
+  -- Prefer glow lifecycle only once we have evidence it's complete/reliable.
+  -- Some servers emit a stray *_GLOW_* event, then mostly use SHOW/HIDE.
+  -- If we lock onto glow too early, we stop seeing real procs.
+  local isGlowShow = (event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW")
+  local isGlowHide = (event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
+  local isGlowEvent = isGlowShow or isGlowHide
+
+  -- Persist across events
+  ev.__saoGlowShowSeen = ev.__saoGlowShowSeen or false
+  ev.__saoGlowHideSeen = ev.__saoGlowHideSeen or false
+
+  if isGlowShow then
+    ev.__saoGlowShowSeen = true
+  elseif isGlowHide then
+    ev.__saoGlowHideSeen = true
+  end
+
+  local trustGlow = ev.__saoGlowShowSeen and ev.__saoGlowHideSeen
+
+  -- Only ignore SHOW/HIDE once we've seen BOTH glow show + glow hide at least once
+  if (not isGlowEvent) and trustGlow then
     return
   end
 
