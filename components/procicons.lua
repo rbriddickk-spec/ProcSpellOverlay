@@ -213,6 +213,8 @@ ev:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 ev:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_SHOW")
 ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_HIDE")
+ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW")
+ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
 
 ev:SetScript("OnEvent", function(_, event, ...)
   if event == "PLAYER_LOGIN" or event == "PLAYER_SPECIALIZATION_CHANGED" or event == "ACTIVE_TALENT_GROUP_CHANGED" then
@@ -224,9 +226,9 @@ ev:SetScript("OnEvent", function(_, event, ...)
   local spellID = ...
   if type(spellID) ~= "number" then return end
 
-  if event == "SPELL_ACTIVATION_OVERLAY_SHOW" then
+  if event == "SPELL_ACTIVATION_OVERLAY_SHOW" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" then
     SAO:ProcIcons_Activate(spellID)
-  elseif event == "SPELL_ACTIVATION_OVERLAY_HIDE" then
+  elseif event == "SPELL_ACTIVATION_OVERLAY_HIDE" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE" then
     SAO:ProcIcons_Deactivate(spellID)
   end
 end)
