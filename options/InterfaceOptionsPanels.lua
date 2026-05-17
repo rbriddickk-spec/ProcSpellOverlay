@@ -239,34 +239,23 @@ SAO:ApplySpellAlertSound()
 end
 local testButton=ProcSpellOverlayOptionsPanelSpellAlertTestButton
 testButton:SetText("Toggle Test")
-testButton.fakeSpellID=42
-testButton.isTesting=false
-local testTextureLeftRight=SAO.IsEra() and "echo_of_the_elements" or "imp_empowerment"
-local testTextureTop=SAO.IsEra() and "fury_of_stormrage" or "brain_freeze"
-local testPositionTop=SAO.IsCata() and "Top (CW)" or "Top"
+testButton.isTesting=ProcSpellOverlayDB.procIcons and ProcSpellOverlayDB.procIcons.testMode==true
 testButton.StartTest=function(self)
 if (not self.isTesting)then
-self.isTesting=true
-SAO:ActivateOverlay(0,self.fakeSpellID,SAO.TexName[testTextureLeftRight], "Left + Right (Flipped)",1,255,255,255,false,nil,GetTime()+5,false,{strata="DIALOG",level=9999})
-SAO:ActivateOverlay(0,self.fakeSpellID,SAO.TexName[testTextureTop] ,testPositionTop ,1,255,255,255,false,nil,GetTime()+5,false,{strata="DIALOG",level=9999})
-self.testTimerTicker=C_Timer.NewTicker(4.9,
-function()
-SAO:RefreshOverlayTimer(self.fakeSpellID,GetTime()+5)
-end)
-ProcSpellOverlayFrame_SetForceAlpha1(true)
+if SAO.ProcIcons_SetTestMode then
+self.isTesting=SAO:ProcIcons_SetTestMode(true)
+end
 end
 end
 testButton.StopTest=function(self)
 if (self.isTesting)then
+if SAO.ProcIcons_SetTestMode then
+SAO:ProcIcons_SetTestMode(false)
+end
 self.isTesting=false
-self.testTimerTicker:Cancel()
-SAO:DeactivateOverlay(self.fakeSpellID)
-ProcSpellOverlayFrame_SetForceAlpha1(false)
 end
 end
-testButton:SetEnabled(ProcSpellOverlayDB.alert.enabled)
-SAO:MarkTexture(testTextureLeftRight)
-SAO:MarkTexture(testTextureTop)
+testButton:SetEnabled(type(SAO.ProcIcons_ToggleTestMode)=="function")
 local debugButton=ProcSpellOverlayOptionsPanelSpellAlertDebugButton
 debugButton.Text:SetText(SAO:optionDebugToChatbox())
 debugButton:SetChecked(ProcSpellOverlayDB.debug==true)
@@ -404,7 +393,7 @@ ProcSpellOverlayDB.alert.sound=soundValue
 SAO:ApplySpellAlertSound()
 end
 local testButton=ProcSpellOverlayOptionsPanelSpellAlertTestButton
-testButton:SetEnabled(ProcSpellOverlayDB.alert.enabled)
+testButton:SetEnabled(type(SAO.ProcIcons_ToggleTestMode)=="function")
 local glowingButtonCheckbox=ProcSpellOverlayOptionsPanelGlowingButtons
 glowingButtonCheckbox:SetChecked(isGlowEnabled)
 if (ProcSpellOverlayDB.glow.enabled~=isGlowEnabled)then
