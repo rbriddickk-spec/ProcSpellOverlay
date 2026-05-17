@@ -11,6 +11,76 @@ local DefaultOrderBySpec = {
   ["WARRIOR:72"] = {190411, 5308, 184367},
   ["WARRIOR:73"] = {23922, 6572, 5308},
 }
+-- Polling model: show icons when spells are usable (works even if overlay events are unreliable)
+local POLL_INTERVAL = 0.10
+local pollElapsed = 0
+
+local function IsSpellReadyAndUsable(spellID)
+  if type(spellID) ~= "number" then return false end
+  if not (GetSpellInfo and GetSpellInfo(spellID)) then return false end
+
+  local usable, noMana = IsUsableSpell and IsUsableSpell(spellID) or false, false
+  if IsUsableSpell then
+    usable, noMana = IsUsableSpell(spellID)
+  end
+  if not usable then
+    return false
+  end
+
+  if GetSpellCooldown then
+    local start, duration, enabled = GetSpellCooldown(spellID)
+    if enabled == 0 then
+      return false
+    end
+    if start and duration and start > 0 and duration > 0 then
+      local remaining = (start + duration) - (GetTime and GetTime() or 0)
+      if remaining > 0.05 then
+        return false
+      end
+    end
+  end
+
+  return true
+end
+
+local function UpdateActiveFromUsability()
+  local p = db()
+  if not p.enabled then
+    return false
+  end
+
+  -- Only poll in normal mode; test mode keeps its own behavior
+  if p.testMode then
+    return false
+  end
+
+  local specKey = GetCurrentClassSpecKey and GetCurrentClassSpecKey() or nil
+  local order = specKey and p.order and p.order[specKey] or nil
+  if type(order) ~= "table" or #order == 0 then
+    return false
+  end
+
+  local changed = false
+
+  -- We treat "active" as "usable now" for each ordered slot spellID
+  for i = 1, p.maxIcons do
+    local spellID = order[i]
+    if type(spellID) == "number" then
+      local shouldBeActive = IsSpellReadyAndUsable(spellID)
+      local isActive = (activeDisplayRefCount[spellID] or 0) > 0
+
+      if shouldBeActive and not isActive then
+        activeDisplayRefCount[spellID] = 1
+        changed = true
+      elseif (not shouldBeActive) and isActive then
+        activeDisplayRefCount[spellID] = nil
+        changed = true
+      end
+    end
+  end
+
+  return changed
+end
 
 local function db()
   ProcSpellOverlayDB = ProcSpellOverlayDB or {}
@@ -140,12 +210,22 @@ container:SetScript("OnDragStart", function(self)
   local p = db()
   if not p.locked then self:StartMoving() end
 end)
+container:SetScript("OnUpdate", function(_, elapsed)
+  pollElapsed = (pollElapsed or 0) + (elapsed or 0)
+  if pollElapsed < POLL_INTERVAL then return end
+  pollElapsed = 0
+
+  if UpdateActiveFromUsability() then
+    Refresh()
+  end
+end)
 container:SetScript("OnDragStop", function(self)
   self:StopMovingOrSizing()
   local p = db()
   local point, _, _, x, y = self:GetPoint(1)
   p.point, p.x, p.y = point, x, y
 end)
+
 
 local function CreateIconFrame(name)
   local f = CreateFrame("Button", name, container, "SecureActionButtonTemplate")
@@ -588,10 +668,10 @@ ev:RegisterEvent("PLAYER_REGEN_DISABLED")
 ev:RegisterEvent("PLAYER_REGEN_ENABLED")
 ev:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 ev:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
-ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_SHOW")
-ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_HIDE")
-ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW")
-ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
+--ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_SHOW")
+--ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_HIDE")
+--ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW")
+--ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
 
 ev:SetScript("OnEvent", function(_, event, ...)
   if event == "PLAYER_LOGIN" or event == "PLAYER_SPECIALIZATION_CHANGED" or event == "ACTIVE_TALENT_GROUP_CHANGED" then
