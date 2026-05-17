@@ -11,6 +11,9 @@ local DefaultOrderBySpec = {
   ["WARRIOR:72"] = {190411, 5308, 184367},
   ["WARRIOR:73"] = {23922, 6572, 5308},
 }
+if (type(order) ~= "table" or #order == 0) and specKey and specKey:match("^WARRIOR:") then
+  order = p.order["WARRIOR:71"]
+end
 -- Polling model: show icons when spells are usable (works even if overlay events are unreliable)
 local POLL_INTERVAL = 0.10
 local pollElapsed = 0
@@ -91,7 +94,17 @@ local function UpdateActiveFromUsability()
   for i = 1, p.maxIcons do
     local spellID = order[i]
     if type(spellID) == "number" then
-      local shouldBeActive = IsSpellReadyAndUsable(spellID)
+      local shouldBeActive = false
+		if type(GlowTrackerDB) == "table"
+		and type(GlowTrackerDB.glows) == "table"
+		and type(GlowTrackerDB.glows.WARRIOR) == "table"
+		and type(GlowTrackerDB.glows.WARRIOR.ARMS) == "table"
+		then
+			shouldBeActive = GlowTrackerDB.glows.WARRIOR.ARMS[spellID] == true
+		else
+  -- fallback if GlowTracker isn't loaded
+			shouldBeActive = IsSpellReadyAndUsable(spellID)
+	  end
       local isActive = (activeDisplayRefCount[spellID] or 0) > 0
 
       if shouldBeActive and not isActive then
@@ -683,29 +696,6 @@ ev:SetScript("OnEvent", function(_, event, ...)
     end
     ApplyLayout()
     Refresh()
-	    -- DEBUG: force show bar briefly so we know runtime path works
-    if event == "PLAYER_LOGIN" then
-      container:Show()
-      EnsureIconFrames(4)
-      -- show something obvious
-      SetIcon(iconFrames[1], 7384)     -- Overpower
-      SetIconGlow(iconFrames[1], true)
-      SetIcon(iconFrames[2], 167105)  -- Colossus Smash
-      SetIconGlow(iconFrames[2], true)
-      SetIcon(iconFrames[3], 5308)    -- Execute
-      SetIconGlow(iconFrames[3], true)
-      SetIcon(iconFrames[4], 34428)   -- Victory Rush
-      SetIconGlow(iconFrames[4], true)
-
-      C_Timer.After(5, function()
-        -- don't break real logic; just hide the forced display
-        for i = 1, 4 do
-          SetIconGlow(iconFrames[i], false)
-          SetIcon(iconFrames[i], nil)
-        end
-        Refresh()
-      end)
-    end
     return
   end
   if event == "PLAYER_REGEN_DISABLED" then
