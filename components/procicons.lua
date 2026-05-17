@@ -1,5 +1,6 @@
 local AddonName, SAO = ...
 local Module = "procicons"
+local LBG = LibStub and LibStub("LibButtonGlow-1.0", true)
 
 -- Minimal, universal "Blizzard-like" proc icon display.
 -- Shows fixed-order icons for active proc overlays.
@@ -62,9 +63,23 @@ local function CreateIconFrame(name)
   f.icon:SetAllPoints(true)
   f.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 
-  f.border = f:CreateTexture(nil, "OVERLAY")
-  f.border:SetAllPoints(true)
-  f.border:SetTexture("Interface\\Buttons\\UI-Quickslot2")
+  -- Ensure no default button normal/highlight/pushed textures create an inner rectangle.
+  if type(f.GetNormalTexture) == "function" then
+    local normal = f:GetNormalTexture()
+    if normal then
+      normal:SetTexture(nil)
+      normal:Hide()
+    end
+  end
+  if type(f.SetNormalTexture) == "function" then
+    f:SetNormalTexture(nil)
+  end
+  if type(f.SetHighlightTexture) == "function" then
+    f:SetHighlightTexture(nil)
+  end
+  if type(f.SetPushedTexture) == "function" then
+    f:SetPushedTexture(nil)
+  end
 
   return f
 end
@@ -128,11 +143,28 @@ local function SetIcon(iconFrame, spellID, isPlaceholder)
   iconFrame:Show()
 end
 
+local function SetIconGlow(iconFrame, shouldGlow)
+  if not (LBG and type(LBG.ShowOverlayGlow) == "function" and type(LBG.HideOverlayGlow) == "function") then
+    return
+  end
+
+  if shouldGlow then
+    if not iconFrame.__saoProcGlowShown then
+      LBG.ShowOverlayGlow(iconFrame)
+      iconFrame.__saoProcGlowShown = true
+    end
+  elseif iconFrame.__saoProcGlowShown then
+    LBG.HideOverlayGlow(iconFrame)
+    iconFrame.__saoProcGlowShown = nil
+  end
+end
+
 local function Refresh()
   local p = db()
   ApplyLayout()
   if not p.enabled then
     for i = 1, #iconFrames do
+      SetIconGlow(iconFrames[i], false)
       iconFrames[i]:Hide()
     end
     container:Hide()
@@ -148,8 +180,11 @@ local function Refresh()
       local spellID = order[i]
       if spellID and (p.testMode or active[spellID]) then
         SetIcon(iconFrames[i], spellID)
+        -- In test mode, show glow on visible proc icons so users can preview the effect.
+        SetIconGlow(iconFrames[i], true)
         hasVisibleIcon = true
       else
+        SetIconGlow(iconFrames[i], false)
         SetIcon(iconFrames[i], nil)
       end
     end
@@ -163,16 +198,20 @@ local function Refresh()
       local spellID = activeSpellIDs[i]
       if spellID then
         SetIcon(iconFrames[i], spellID)
+        SetIconGlow(iconFrames[i], true)
         hasVisibleIcon = true
       elseif p.testMode and #activeSpellIDs == 0 then
         SetIcon(iconFrames[i], nil, true)
+        SetIconGlow(iconFrames[i], true)
         hasVisibleIcon = true
       else
+        SetIconGlow(iconFrames[i], false)
         SetIcon(iconFrames[i], nil)
       end
     end
   end
   for i = p.maxIcons + 1, #iconFrames do
+    SetIconGlow(iconFrames[i], false)
     iconFrames[i]:Hide()
   end
 
