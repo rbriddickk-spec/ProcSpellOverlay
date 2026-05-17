@@ -97,14 +97,26 @@ function SAO:IsIconsOnlyModeEnabled()
 return ProcSpellOverlayDB and ProcSpellOverlayDB.iconsOnly==true
 end
 function SAO:ReportUnknownEffect(prefix,spellID,texture,positions,scale,r,g,b)
-if self:CanReport()
-and self:HasReport()
-and self:HasUnknownEffectReporting()
-and self:AreEffectsInitialized()
-and spellID
-and not self:GetBucketBySpellID(spellID)
-and not self:IsAka(spellID)
-then
+if not self:AreEffectsInitialized() then return end
+if not spellID then return end
+if self:GetBucketBySpellID(spellID) then return end
+if self:IsAka(spellID) then return end
+-- Always silently store unknown effects in SavedVariables for personal DB work
+ProcSpellOverlayDB = ProcSpellOverlayDB or {}
+ProcSpellOverlayDB.unknownProcs = ProcSpellOverlayDB.unknownProcs or {}
+if not ProcSpellOverlayDB.unknownProcs[spellID] then
+ProcSpellOverlayDB.unknownProcs[spellID] = {
+texture = texture,
+positions = positions,
+scale = scale,
+r = r,
+g = g,
+b = b,
+timestamp = GetTime(),
+}
+end
+-- Print to chat only when explicitly enabled via dev flag
+if self:CanReport() and self:HasReport() and self:HasUnknownEffectReporting() then
 if not self.UnknownNativeEffects then
 self.UnknownNativeEffects={}
 end

@@ -40,6 +40,43 @@ local function GetProcIconsOptions()
   return p
 end
 
+local function ApplyIconsOnlyMode()
+local iconsOnly = ProcSpellOverlayDB and ProcSpellOverlayDB.iconsOnly == true
+local legacyShown = not iconsOnly
+-- Spell Alerts sliders
+ProcSpellOverlayOptionsPanelSpellAlertOpacitySlider:SetShown(legacyShown)
+ProcSpellOverlayOptionsPanelSpellAlertScaleSlider:SetShown(legacyShown)
+ProcSpellOverlayOptionsPanelSpellAlertOffsetSlider:SetShown(legacyShown)
+ProcSpellOverlayOptionsPanelSpellAlertTimerSlider:SetShown(legacyShown)
+ProcSpellOverlayOptionsPanelSpellAlertSoundSlider:SetShown(legacyShown)
+-- Spell Alerts section labels
+if ProcSpellOverlayOptionsPanelSpellAlertLabel then
+ProcSpellOverlayOptionsPanelSpellAlertLabel:SetShown(legacyShown)
+end
+if ProcSpellOverlayOptionsPanel.alertNone then
+ProcSpellOverlayOptionsPanel.alertNone:SetShown(legacyShown)
+end
+-- Glowing Buttons section
+ProcSpellOverlayOptionsPanelGlowingButtons:SetShown(legacyShown)
+if ProcSpellOverlayOptionsPanel.glowNone then
+ProcSpellOverlayOptionsPanel.glowNone:SetShown(legacyShown)
+end
+-- Debug/report options (respect their own conditional visibility)
+ProcSpellOverlayOptionsPanelSpellAlertDebugButton:SetShown(legacyShown)
+ProcSpellOverlayOptionsPanelSpellAlertResponsiveButton:SetShown(legacyShown)
+-- reportButton is only valid when SAO:CanReport() is true
+ProcSpellOverlayOptionsPanelSpellAlertReportButton:SetShown(legacyShown and SAO:CanReport())
+-- askDisableGameAlertButton is only valid when the question is possible
+ProcSpellOverlayOptionsPanelSpellAlertAskDisableGameAlertButton:SetShown(legacyShown and SAO:IsQuestionPossible(SAO.QUESTIONS.DISABLE_GAME_ALERT))
+-- Additional per-effect checkboxes
+for _,checkbox in ipairs(ProcSpellOverlayOptionsPanel.additionalCheckboxes and ProcSpellOverlayOptionsPanel.additionalCheckboxes.alert or {})do
+checkbox:SetShown(legacyShown)
+end
+for _,checkbox in ipairs(ProcSpellOverlayOptionsPanel.additionalCheckboxes and ProcSpellOverlayOptionsPanel.additionalCheckboxes.glow or {})do
+checkbox:SetShown(legacyShown)
+end
+end
+
 function ProcSpellOverlayOptionsPanel_Init(self)
 local shutdownCategory=SAO.Shutdown:GetCategory()
 if shutdownCategory then
@@ -407,6 +444,16 @@ else
 ProcSpellOverlayOptionsPanel.classOptions={initialValue={}}
 end
 ProcSpellOverlayOptionsPanel.additionalCheckboxes={}
+if ProcSpellOverlayDB.iconsOnly == nil then ProcSpellOverlayDB.iconsOnly = false end
+local iconsOnlyButton=ProcSpellOverlayOptionsPanelIconsOnlyButton
+iconsOnlyButton.Text:SetText("Icons-only mode")
+iconsOnlyButton.initialValue=ProcSpellOverlayDB.iconsOnly==true
+iconsOnlyButton:SetChecked(iconsOnlyButton.initialValue)
+iconsOnlyButton.ApplyValueToEngine=function(self,checked)
+ProcSpellOverlayDB.iconsOnly=checked==true
+ApplyIconsOnlyMode()
+end
+ApplyIconsOnlyMode()
 end
 local function okayFunc(self)
 local opacitySlider=ProcSpellOverlayOptionsPanelSpellAlertOpacitySlider
@@ -435,6 +482,8 @@ local classOptions=ProcSpellOverlayDB.classes and SAO.CurrentClass and ProcSpell
 if (classOptions)then
 ProcSpellOverlayOptionsPanel.classOptions.initialValue=CopyTable(classOptions)
 end
+local iconsOnlyButton=ProcSpellOverlayOptionsPanelIconsOnlyButton
+iconsOnlyButton.initialValue=iconsOnlyButton:GetChecked()
 end
 local function cancelFunc(self)
 local opacitySlider=ProcSpellOverlayOptionsPanelSpellAlertOpacitySlider
@@ -448,6 +497,7 @@ local procIconsSizeSlider=ProcSpellOverlayOptionsPanelProcIconsSizeSlider
 local procIconsGapSlider=ProcSpellOverlayOptionsPanelProcIconsGapSlider
 local procIconsXSlider=ProcSpellOverlayOptionsPanelProcIconsXSlider
 local procIconsYSlider=ProcSpellOverlayOptionsPanelProcIconsYSlider
+local iconsOnlyButton=ProcSpellOverlayOptionsPanelIconsOnlyButton
 local classOptions=ProcSpellOverlayOptionsPanel.classOptions
 self:applyAll(
 opacitySlider.initialValue,
@@ -461,7 +511,8 @@ procIconsSizeSlider.initialValue,
 procIconsGapSlider.initialValue,
 procIconsXSlider.initialValue,
 procIconsYSlider.initialValue,
-classOptions.initialValue
+classOptions.initialValue,
+iconsOnlyButton.initialValue
 )
 end
 local function defaultFunc(self)
@@ -478,10 +529,11 @@ true,
 10,
 0,
 -140,
-defaultClassOptions
+defaultClassOptions,
+false
 )
 end
-local function applyAllFunc(self,opacityValue,scaleValue,offsetValue,timerValue,soundValue,isGlowEnabled,procIconsEnabled,procIconsSize,procIconsGap,procIconsX,procIconsY,classOptions)
+local function applyAllFunc(self,opacityValue,scaleValue,offsetValue,timerValue,soundValue,isGlowEnabled,procIconsEnabled,procIconsSize,procIconsGap,procIconsX,procIconsY,classOptions,iconsOnlyValue)
 local opacitySlider=ProcSpellOverlayOptionsPanelSpellAlertOpacitySlider
 opacitySlider:SetValue(opacityValue)
 if (ProcSpellOverlayDB.alert.opacity~=opacityValue)then
@@ -547,6 +599,13 @@ for _,checkbox in ipairs(ProcSpellOverlayOptionsPanel.additionalCheckboxes.glow 
 checkbox:ApplyValue()
 end
 end
+local iconsOnlyButton=ProcSpellOverlayOptionsPanelIconsOnlyButton
+local iconsOnly=iconsOnlyValue==true
+iconsOnlyButton:SetChecked(iconsOnly)
+if (ProcSpellOverlayDB.iconsOnly~=iconsOnly)then
+ProcSpellOverlayDB.iconsOnly=iconsOnly
+end
+ApplyIconsOnlyMode()
 end
 local InterfaceOptions_AddCategory=InterfaceOptions_AddCategory
 local InterfaceOptionsFrame_OpenToCategory=InterfaceOptionsFrame_OpenToCategory
@@ -608,6 +667,7 @@ ProcSpellOverlayOptionsPanel[optionType.."None"]:SetText(text)
 end
 end
 optionsLoaded=true
+ApplyIconsOnlyMode()
 end
 if not iamNecrosis then
 SLASH_SAO1="/sao"
