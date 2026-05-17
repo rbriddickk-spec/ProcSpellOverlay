@@ -27,6 +27,19 @@ local function SetSliderText(slider, text)
     slider:SetText(text)
   end
 end
+
+local function GetProcIconsOptions()
+  ProcSpellOverlayDB.procIcons = ProcSpellOverlayDB.procIcons or {}
+  local p = ProcSpellOverlayDB.procIcons
+  if p.enabled == nil then p.enabled = true end
+  if p.point == nil then p.point = "CENTER" end
+  if p.x == nil then p.x = 0 end
+  if p.y == nil then p.y = -140 end
+  if p.size == nil then p.size = 56 end
+  if p.gap == nil then p.gap = 10 end
+  return p
+end
+
 function ProcSpellOverlayOptionsPanel_Init(self)
 local shutdownCategory=SAO.Shutdown:GetCategory()
 if shutdownCategory then
@@ -300,6 +313,93 @@ checkbox:ApplyParentEnabling()
 end
 SAO:ApplyGlowingButtonsToggle()
 end
+local procIcons=GetProcIconsOptions()
+local procIconsEnabledCheckbox=ProcSpellOverlayOptionsPanelProcIconsEnabled
+procIconsEnabledCheckbox.Text:SetText("Enable Proc Icons")
+procIconsEnabledCheckbox.initialValue=procIcons.enabled
+procIconsEnabledCheckbox:SetChecked(procIconsEnabledCheckbox.initialValue)
+procIconsEnabledCheckbox.ApplyValueToEngine=function(self,checked)
+local p=GetProcIconsOptions()
+local enabled=checked==true
+if p.enabled~=enabled then
+p.enabled=enabled
+if SAO.ProcIcons_ApplyLayoutAndRefresh then
+SAO:ProcIcons_ApplyLayoutAndRefresh()
+end
+end
+end
+local procIconsSizeSlider=ProcSpellOverlayOptionsPanelProcIconsSizeSlider
+SetSliderText(procIconsSizeSlider, "Proc Icons Size")
+_G[procIconsSizeSlider:GetName().."Low"]:SetText("20")
+_G[procIconsSizeSlider:GetName().."High"]:SetText("80")
+procIconsSizeSlider:SetMinMaxValues(20,80)
+procIconsSizeSlider:SetValueStep(1)
+procIconsSizeSlider.initialValue=procIcons.size
+procIconsSizeSlider:SetValue(procIconsSizeSlider.initialValue)
+procIconsSizeSlider.ApplyValueToEngine=function(self,value)
+local p=GetProcIconsOptions()
+value=math.floor(value+0.5)
+if p.size~=value then
+p.size=value
+if SAO.ProcIcons_ApplyLayoutAndRefresh then
+SAO:ProcIcons_ApplyLayoutAndRefresh()
+end
+end
+end
+local procIconsGapSlider=ProcSpellOverlayOptionsPanelProcIconsGapSlider
+SetSliderText(procIconsGapSlider, "Proc Icons Gap")
+_G[procIconsGapSlider:GetName().."Low"]:SetText("0")
+_G[procIconsGapSlider:GetName().."High"]:SetText("30")
+procIconsGapSlider:SetMinMaxValues(0,30)
+procIconsGapSlider:SetValueStep(1)
+procIconsGapSlider.initialValue=procIcons.gap
+procIconsGapSlider:SetValue(procIconsGapSlider.initialValue)
+procIconsGapSlider.ApplyValueToEngine=function(self,value)
+local p=GetProcIconsOptions()
+value=math.floor(value+0.5)
+if p.gap~=value then
+p.gap=value
+if SAO.ProcIcons_ApplyLayoutAndRefresh then
+SAO:ProcIcons_ApplyLayoutAndRefresh()
+end
+end
+end
+local procIconsXSlider=ProcSpellOverlayOptionsPanelProcIconsXSlider
+SetSliderText(procIconsXSlider, "Proc Icons X Offset")
+_G[procIconsXSlider:GetName().."Low"]:SetText("-800")
+_G[procIconsXSlider:GetName().."High"]:SetText("800")
+procIconsXSlider:SetMinMaxValues(-800,800)
+procIconsXSlider:SetValueStep(1)
+procIconsXSlider.initialValue=procIcons.x
+procIconsXSlider:SetValue(procIconsXSlider.initialValue)
+procIconsXSlider.ApplyValueToEngine=function(self,value)
+local p=GetProcIconsOptions()
+value=math.floor(value+0.5)
+if p.x~=value then
+p.x=value
+if SAO.ProcIcons_ApplyLayoutAndRefresh then
+SAO:ProcIcons_ApplyLayoutAndRefresh()
+end
+end
+end
+local procIconsYSlider=ProcSpellOverlayOptionsPanelProcIconsYSlider
+SetSliderText(procIconsYSlider, "Proc Icons Y Offset")
+_G[procIconsYSlider:GetName().."Low"]:SetText("-600")
+_G[procIconsYSlider:GetName().."High"]:SetText("600")
+procIconsYSlider:SetMinMaxValues(-600,600)
+procIconsYSlider:SetValueStep(1)
+procIconsYSlider.initialValue=procIcons.y
+procIconsYSlider:SetValue(procIconsYSlider.initialValue)
+procIconsYSlider.ApplyValueToEngine=function(self,value)
+local p=GetProcIconsOptions()
+value=math.floor(value+0.5)
+if p.y~=value then
+p.y=value
+if SAO.ProcIcons_ApplyLayoutAndRefresh then
+SAO:ProcIcons_ApplyLayoutAndRefresh()
+end
+end
+end
 local classOptions=ProcSpellOverlayDB.classes and SAO.CurrentClass and ProcSpellOverlayDB.classes[SAO.CurrentClass.Intrinsics[2]]
 if (classOptions)then
 ProcSpellOverlayOptionsPanel.classOptions={initialValue=CopyTable(classOptions)}
@@ -321,6 +421,16 @@ local soundSlider=ProcSpellOverlayOptionsPanelSpellAlertSoundSlider
 soundSlider.initialValue=soundSlider:GetValue()
 local glowingButtonCheckbox=ProcSpellOverlayOptionsPanelGlowingButtons
 glowingButtonCheckbox.initialValue=glowingButtonCheckbox:GetChecked()
+local procIconsEnabledCheckbox=ProcSpellOverlayOptionsPanelProcIconsEnabled
+procIconsEnabledCheckbox.initialValue=procIconsEnabledCheckbox:GetChecked()
+local procIconsSizeSlider=ProcSpellOverlayOptionsPanelProcIconsSizeSlider
+procIconsSizeSlider.initialValue=procIconsSizeSlider:GetValue()
+local procIconsGapSlider=ProcSpellOverlayOptionsPanelProcIconsGapSlider
+procIconsGapSlider.initialValue=procIconsGapSlider:GetValue()
+local procIconsXSlider=ProcSpellOverlayOptionsPanelProcIconsXSlider
+procIconsXSlider.initialValue=procIconsXSlider:GetValue()
+local procIconsYSlider=ProcSpellOverlayOptionsPanelProcIconsYSlider
+procIconsYSlider.initialValue=procIconsYSlider:GetValue()
 local classOptions=ProcSpellOverlayDB.classes and SAO.CurrentClass and ProcSpellOverlayDB.classes[SAO.CurrentClass.Intrinsics[2]]
 if (classOptions)then
 ProcSpellOverlayOptionsPanel.classOptions.initialValue=CopyTable(classOptions)
@@ -333,6 +443,11 @@ local offsetSlider=ProcSpellOverlayOptionsPanelSpellAlertOffsetSlider
 local timerSlider=ProcSpellOverlayOptionsPanelSpellAlertTimerSlider
 local soundSlider=ProcSpellOverlayOptionsPanelSpellAlertSoundSlider
 local glowingButtonCheckbox=ProcSpellOverlayOptionsPanelGlowingButtons
+local procIconsEnabledCheckbox=ProcSpellOverlayOptionsPanelProcIconsEnabled
+local procIconsSizeSlider=ProcSpellOverlayOptionsPanelProcIconsSizeSlider
+local procIconsGapSlider=ProcSpellOverlayOptionsPanelProcIconsGapSlider
+local procIconsXSlider=ProcSpellOverlayOptionsPanelProcIconsXSlider
+local procIconsYSlider=ProcSpellOverlayOptionsPanelProcIconsYSlider
 local classOptions=ProcSpellOverlayOptionsPanel.classOptions
 self:applyAll(
 opacitySlider.initialValue,
@@ -341,6 +456,11 @@ offsetSlider.initialValue,
 timerSlider.initialValue,
 soundSlider.initialValue,
 glowingButtonCheckbox.initialValue,
+procIconsEnabledCheckbox.initialValue,
+procIconsSizeSlider.initialValue,
+procIconsGapSlider.initialValue,
+procIconsXSlider.initialValue,
+procIconsYSlider.initialValue,
 classOptions.initialValue
 )
 end
@@ -353,10 +473,15 @@ self:applyAll(
 1,
 SAO.IsCata() and 1 or 0,
 true,
+true,
+56,
+10,
+0,
+-140,
 defaultClassOptions
 )
 end
-local function applyAllFunc(self,opacityValue,scaleValue,offsetValue,timerValue,soundValue,isGlowEnabled,classOptions)
+local function applyAllFunc(self,opacityValue,scaleValue,offsetValue,timerValue,soundValue,isGlowEnabled,procIconsEnabled,procIconsSize,procIconsGap,procIconsX,procIconsY,classOptions)
 local opacitySlider=ProcSpellOverlayOptionsPanelSpellAlertOpacitySlider
 opacitySlider:SetValue(opacityValue)
 if (ProcSpellOverlayDB.alert.opacity~=opacityValue)then
@@ -400,6 +525,19 @@ if (ProcSpellOverlayDB.glow.enabled~=isGlowEnabled)then
 ProcSpellOverlayDB.glow.enabled=isGlowEnabled
 glowingButtonCheckbox:ApplyValueToEngine(isGlowEnabled)
 end
+local procIconsEnabledCheckbox=ProcSpellOverlayOptionsPanelProcIconsEnabled
+procIconsEnabledCheckbox:SetChecked(procIconsEnabled)
+if (GetProcIconsOptions().enabled~=procIconsEnabled)then
+procIconsEnabledCheckbox:ApplyValueToEngine(procIconsEnabled)
+end
+local procIconsSizeSlider=ProcSpellOverlayOptionsPanelProcIconsSizeSlider
+procIconsSizeSlider:SetValue(procIconsSize)
+local procIconsGapSlider=ProcSpellOverlayOptionsPanelProcIconsGapSlider
+procIconsGapSlider:SetValue(procIconsGap)
+local procIconsXSlider=ProcSpellOverlayOptionsPanelProcIconsXSlider
+procIconsXSlider:SetValue(procIconsX)
+local procIconsYSlider=ProcSpellOverlayOptionsPanelProcIconsYSlider
+procIconsYSlider:SetValue(procIconsY)
 if (ProcSpellOverlayDB.classes and SAO.CurrentClass and ProcSpellOverlayDB.classes[SAO.CurrentClass.Intrinsics[2]] and classOptions)then
 ProcSpellOverlayDB.classes[SAO.CurrentClass.Intrinsics[2]]=CopyTable(classOptions)
 for _,checkbox in ipairs(ProcSpellOverlayOptionsPanel.additionalCheckboxes.alert or {})do
