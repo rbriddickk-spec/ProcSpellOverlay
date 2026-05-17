@@ -39,6 +39,16 @@ local function ResolveDisplaySpellID(triggerSpellID)
   return (type(GlowTrackerDB)=="table" and type(GlowTrackerDB.alias)=="table" and GlowTrackerDB.alias[triggerSpellID]) or triggerSpellID
 end
 
+local function GetSpellTextureCompat(spellID)
+  if type(spellID) ~= "number" then return nil end
+  local texture = GetSpellTexture and GetSpellTexture(spellID) or nil
+  if texture then
+    return texture
+  end
+  local _, _, iconTexture = GetSpellInfo and GetSpellInfo(spellID) or nil
+  return iconTexture
+end
+
 local PLACEHOLDER_ALPHA = 0.5
 local BORDER_R, BORDER_G, BORDER_B, BORDER_A = 0.82, 0.82, 0.82, 0.9
 
@@ -69,6 +79,26 @@ local function CreateIconFrame(name)
   f.icon = f:CreateTexture(nil, "ARTWORK")
   f.icon:SetAllPoints(true)
   f.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+  f.icon:SetVertexColor(1, 1, 1, 1)
+
+  f.fallbackGlow = f:CreateTexture(nil, "OVERLAY", nil, 7)
+  f.fallbackGlow:SetTexture("Interface\\Buttons\\UI-ActionButton-Border")
+  f.fallbackGlow:SetBlendMode("ADD")
+  f.fallbackGlow:SetAlpha(0)
+  f.fallbackGlow:Hide()
+
+  f.fallbackGlowAnim = f.fallbackGlow:CreateAnimationGroup()
+  f.fallbackGlowAnim:SetLooping("REPEAT")
+  local glowAlphaIn = f.fallbackGlowAnim:CreateAnimation("Alpha")
+  glowAlphaIn:SetOrder(1)
+  glowAlphaIn:SetDuration(0.55)
+  glowAlphaIn:SetFromAlpha(0.35)
+  glowAlphaIn:SetToAlpha(0.95)
+  local glowAlphaOut = f.fallbackGlowAnim:CreateAnimation("Alpha")
+  glowAlphaOut:SetOrder(2)
+  glowAlphaOut:SetDuration(0.55)
+  glowAlphaOut:SetFromAlpha(0.95)
+  glowAlphaOut:SetToAlpha(0.35)
 
   f.borderTop = f:CreateTexture(nil, "OVERLAY")
   f.borderRight = f:CreateTexture(nil, "OVERLAY")
@@ -175,6 +205,24 @@ local function ApplyLayout()
     icon.borderRight:SetPoint("TOPRIGHT", icon, "TOPRIGHT", 0, -borderSize)
     icon.borderRight:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", 0, borderSize)
     icon.borderRight:SetWidth(borderSize)
+
+    icon.fallbackGlow:ClearAllPoints()
+    icon.fallbackGlow:SetPoint("CENTER", icon, "CENTER")
+    icon.fallbackGlow:SetSize(size * 1.75, size * 1.75)
+  end
+end
+
+local function SetFallbackGlow(iconFrame, shouldGlow)
+  if shouldGlow then
+    if not iconFrame.__saoProcFallbackGlowShown then
+      iconFrame.fallbackGlow:Show()
+      iconFrame.fallbackGlowAnim:Play()
+      iconFrame.__saoProcFallbackGlowShown = true
+    end
+  elseif iconFrame.__saoProcFallbackGlowShown then
+    iconFrame.fallbackGlowAnim:Stop()
+    iconFrame.fallbackGlow:Hide()
+    iconFrame.__saoProcFallbackGlowShown = nil
   end
 end
 
@@ -188,35 +236,41 @@ local function SetIcon(iconFrame, spellID, isPlaceholder)
     return
   end
 
-  local tex = spellID and GetSpellTexture(spellID) or nil
+  local tex = spellID and GetSpellTextureCompat(spellID) or nil
   local showPlaceholder = isPlaceholder or not tex
 
   iconFrame.icon:SetShown(not showPlaceholder)
   iconFrame.fill:SetShown(showPlaceholder)
   if showPlaceholder then
     iconFrame.icon:SetTexture(nil)
+    iconFrame.icon:SetVertexColor(1, 1, 1, 1)
+    iconFrame.fill:SetColorTexture(0, 0, 0, PLACEHOLDER_ALPHA)
+    iconFrame.fill:SetVertexColor(1, 1, 1, 1)
     iconFrame.spellID = nil
   else
     iconFrame.icon:SetTexture(tex)
+    iconFrame.icon:SetVertexColor(1, 1, 1, 1)
     iconFrame.spellID = spellID
   end
   iconFrame:Show()
 end
 
 local function SetIconGlow(iconFrame, shouldGlow)
-  if not (LBG and type(LBG.ShowOverlayGlow) == "function" and type(LBG.HideOverlayGlow) == "function") then
-    return
+  local hasLBG = LBG and type(LBG.ShowOverlayGlow) == "function" and type(LBG.HideOverlayGlow) == "function"
+
+  if hasLBG then
+    if shouldGlow then
+      if not iconFrame.__saoProcGlowShown then
+        LBG.ShowOverlayGlow(iconFrame)
+        iconFrame.__saoProcGlowShown = true
+      end
+    elseif iconFrame.__saoProcGlowShown then
+      LBG.HideOverlayGlow(iconFrame)
+      iconFrame.__saoProcGlowShown = nil
+    end
   end
 
-  if shouldGlow then
-    if not iconFrame.__saoProcGlowShown then
-      LBG.ShowOverlayGlow(iconFrame)
-      iconFrame.__saoProcGlowShown = true
-    end
-  elseif iconFrame.__saoProcGlowShown then
-    LBG.HideOverlayGlow(iconFrame)
-    iconFrame.__saoProcGlowShown = nil
-  end
+  SetFallbackGlow(iconFrame, shouldGlow and not iconFrame.__saoProcGlowShown)
 end
 
 local function Refresh()
