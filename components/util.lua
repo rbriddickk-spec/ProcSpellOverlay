@@ -88,9 +88,18 @@ end
 function SAO:HasReport()
 return ProcSpellOverlayDB and ProcSpellOverlayDB.report~=false
 end
+function SAO:HasUnknownEffectReporting()
+return ProcSpellOverlayDB
+and ProcSpellOverlayDB.dev
+and ProcSpellOverlayDB.dev.reportUnknownEffects==true
+end
+function SAO:IsIconsOnlyModeEnabled()
+return ProcSpellOverlayDB and ProcSpellOverlayDB.iconsOnly==true
+end
 function SAO:ReportUnknownEffect(prefix,spellID,texture,positions,scale,r,g,b)
 if self:CanReport()
 and self:HasReport()
+and self:HasUnknownEffectReporting()
 and self:AreEffectsInitialized()
 and spellID
 and not self:GetBucketBySpellID(spellID)
