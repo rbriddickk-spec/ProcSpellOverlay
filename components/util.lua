@@ -93,46 +93,77 @@ return ProcSpellOverlayDB
 and ProcSpellOverlayDB.dev
 and ProcSpellOverlayDB.dev.reportUnknownEffects==true
 end
-function SAO:IsIconsOnlyModeEnabled()
-return ProcSpellOverlayDB and ProcSpellOverlayDB.iconsOnly==true
+local function getCurrentClassAndSpec()
+local classFile=select(2,UnitClass("player")) or "UNKNOWN"
+local specName="UNKNOWN"
+if type(GetSpecialization)=="function" and type(GetSpecializationInfo)=="function" then
+local specIndex=GetSpecialization()
+if specIndex then
+local _,name=GetSpecializationInfo(specIndex)
+if type(name)=="string" and #name > 0 then
+specName=strupper(name)
+else
+specName=tostring(specIndex)
+end
+end
+end
+return classFile,specName
+end
+function SAO:GlowTracker_TrackSpellID(spellID,classFile,specName)
+if type(spellID)~="number" then return end
+if type(GlowTrackerDB)~="table" then
+GlowTrackerDB={}
+end
+GlowTrackerDB.glows=GlowTrackerDB.glows or {}
+classFile=classFile or select(2,UnitClass("player")) or "UNKNOWN"
+if not specName then
+local _,resolvedSpecName=getCurrentClassAndSpec()
+specName=resolvedSpecName
+end
+GlowTrackerDB.glows[classFile]=GlowTrackerDB.glows[classFile] or {}
+GlowTrackerDB.glows[classFile][specName]=GlowTrackerDB.glows[classFile][specName] or {}
+GlowTrackerDB.glows[classFile][specName][spellID]=true
 end
 function SAO:ReportUnknownEffect(prefix,spellID,texture,positions,scale,r,g,b)
 if not self:AreEffectsInitialized() then return end
 if not spellID then return end
 if self:GetBucketBySpellID(spellID) then return end
 if self:IsAka(spellID) then return end
--- Always silently store unknown effects in SavedVariables for personal DB work
+local classFile,specName=getCurrentClassAndSpec()
+if type(self.GlowTracker_TrackSpellID)=="function" then
+self:GlowTracker_TrackSpellID(spellID,classFile,specName)
+end
 ProcSpellOverlayDB = ProcSpellOverlayDB or {}
 ProcSpellOverlayDB.unknownProcs = ProcSpellOverlayDB.unknownProcs or {}
-if not ProcSpellOverlayDB.unknownProcs[spellID] then
-ProcSpellOverlayDB.unknownProcs[spellID] = {
-texture = texture,
-positions = positions,
-scale = scale,
-r = r,
-g = g,
-b = b,
-timestamp = GetTime(),
+local key=table.concat({
+tostring(spellID),
+tostring(texture),
+tostring(positions),
+tostring(scale),
+tostring(r),
+tostring(g),
+tostring(b),
+}, "|")
+local now=(type(time)=="function" and time()) or math.floor(GetTime())
+local entry=ProcSpellOverlayDB.unknownProcs[key]
+if entry then
+entry.lastSeen=now
+entry.count=(tonumber(entry.count) or 0)+1
+else
+ProcSpellOverlayDB.unknownProcs[key]={
+spellID=spellID,
+texture=texture,
+positions=positions,
+scale=scale,
+r=r,
+g=g,
+b=b,
+firstSeen=now,
+lastSeen=now,
+count=1,
+class=classFile,
+spec=specName,
 }
-end
--- Print to chat only when explicitly enabled via dev flag
-if self:CanReport() and self:HasReport() and self:HasUnknownEffectReporting() then
-if not self.UnknownNativeEffects then
-self.UnknownNativeEffects={}
-end
-if not self.UnknownNativeEffects[spellID] then
-local text=""
-text=text..", ".."flavor="..tostring(self.GetFlavorName())
-text=text..", ".."spell="..tostring(spellID).." ("..self:GetSpellName(spellID, "unknown spell")..")"
-text=text..", ".."tex="..tostring(texture)
-text=text..", ".."pos="..((type(positions)=='string') and ("'"..positions.."'") or tostring(positions))
-text=text..", ".."scale="..tostring(scale)
-text=text..", ".."r="..tostring(r)
-text=text..", ".."g="..tostring(g)
-text=text..", ".."b="..tostring(b)
-self.UnknownNativeEffects[spellID]=text
-self:Info(prefix, "Unknown proc effect"..text)
-end
 end
 end
 

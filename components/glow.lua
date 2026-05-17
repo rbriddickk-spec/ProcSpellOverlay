@@ -8,6 +8,28 @@ SAO.GlowingSpells={}
 SAO.RegisteredGlowSpellIDs={}
 SAO.RegisteredGlowSpellNames={}
 function SAO.RegisterGlowID(self,glowID)
+return
+end
+function SAO.RegisterGlowIDs(self,glowIDs)
+return
+end
+function SAO.UpdateActionButton(self,button,forceRefresh)
+return
+end
+function SAO.AwakeButtonsBySpellID(self,spellID)
+return
+end
+function SAO.AddGlowNumber(self,spellID,glowID)
+return
+end
+function SAO.AddGlow(self,spellID,glowIDs,hashData)
+return
+end
+function SAO.RemoveGlow(self,spellID,glowIDs)
+return
+end
+if true then return end
+function SAO.RegisterGlowID(self,glowID)
 if (type(glowID)=="number")then
 self.RegisteredGlowSpellIDs[glowID]=true
 self:AwakeButtonsBySpellID(glowID)

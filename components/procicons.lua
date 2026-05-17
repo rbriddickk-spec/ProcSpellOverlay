@@ -136,6 +136,11 @@ local function Refresh()
 
   local orderKey = GetCurrentClassSpecKey()
   local order = orderKey and p.order and p.order[orderKey] or nil
+  if type(SAO.GlowTracker_TrackSpellID)=="function" and type(order)=="table" then
+    for _,spellID in ipairs(order) do
+      SAO:GlowTracker_TrackSpellID(spellID)
+    end
+  end
   local hasVisibleIcon = false
   for i = 1, p.maxIcons do
     local spellID = order and order[i] or nil
@@ -155,6 +160,9 @@ end
 
 function SAO:ProcIcons_Activate(spellID)
   if type(spellID) ~= "number" then return end
+  if type(self.GlowTracker_TrackSpellID)=="function" then
+    self:GlowTracker_TrackSpellID(spellID)
+  end
   active[spellID] = true
   Refresh()
 end
@@ -188,10 +196,6 @@ ev:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_SHOW")
 ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_HIDE")
 
--- Some clients use the *_GLOW_* variants; registering them doesn't hurt.
-pcall(function() ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW") end)
-pcall(function() ev:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE") end)
-
 ev:SetScript("OnEvent", function(_, event, ...)
   if event == "PLAYER_LOGIN" or event == "PLAYER_SPECIALIZATION_CHANGED" or event == "ACTIVE_TALENT_GROUP_CHANGED" then
     ApplyLayout()
@@ -202,9 +206,9 @@ ev:SetScript("OnEvent", function(_, event, ...)
   local spellID = ...
   if type(spellID) ~= "number" then return end
 
-  if event == "SPELL_ACTIVATION_OVERLAY_SHOW" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" then
+  if event == "SPELL_ACTIVATION_OVERLAY_SHOW" then
     SAO:ProcIcons_Activate(spellID)
-  elseif event == "SPELL_ACTIVATION_OVERLAY_HIDE" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE" then
+  elseif event == "SPELL_ACTIVATION_OVERLAY_HIDE" then
     SAO:ProcIcons_Deactivate(spellID)
   end
 end)
